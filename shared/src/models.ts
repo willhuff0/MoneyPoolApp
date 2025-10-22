@@ -9,6 +9,7 @@ export interface SessionToken {
 export interface User {
     userId: string,
     displayName: string,
+    userName: string,
     chompScore: number,
 }
 

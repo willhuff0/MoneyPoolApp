@@ -46,9 +46,7 @@ export class SessionAuthority {
             const claimedSignatureBuffer = Buffer.from(encodedParts[1], 'base64');
             if (!this.verifySignature(bodyBuffer, claimedSignatureBuffer)) return null;
 
-            
-
-            return null;
+            return body;
         } catch (e: unknown) {
             console.log(`An error occurred while trying to verify token: ${e}`);
             return null;

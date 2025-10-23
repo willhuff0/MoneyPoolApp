@@ -4,6 +4,7 @@ const userSchema = new Schema(
     {
       user_id : {type: Number, required: true, unique: true},
       username : {type: String, required: true, unique: true},
+      password : {type: String, required:true},
       name : {type: String, required: true},
       chomp_score : {type: Number, required: true},
       friends : [{type: Types.ObjectId, ref: "User"}]

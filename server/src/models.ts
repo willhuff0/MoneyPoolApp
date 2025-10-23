@@ -3,9 +3,10 @@ import { Schema, model, Types } from "mongoose";
 const userSchema = new Schema(
     {
       user_id : {type: Number, required: true, unique: true},
+      username : {type: String, required: true, unique: true},
       name : {type: String, required: true},
-      chomp_score : {type: Number, required: true}
-
+      chomp_score : {type: Number, required: true},
+      friends : [{type: Types.ObjectId, ref: "User"}]
     },
     {timestamps: true}
 );
@@ -52,3 +53,14 @@ const transactionSchema = new Schema(
 );
 
 export const Transaction = model("Transaction", transactionSchema)
+
+const friendRequestSchema = new Schema(
+  {
+    from: {type: Types.ObjectId, ref: "User", required: true},
+    to: {type: Types.ObjectId, ref: "User", required: true},
+    status: {type: String, enum: ["Pending, Accepted"], default: "Pending"}
+  },
+  {timestamps: true}
+);
+
+export const FriendRequest = model("FriendRequest", friendRequestSchema)

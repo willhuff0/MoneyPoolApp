@@ -11,7 +11,7 @@ const userSchema = new Schema(
     {timestamps: true}
 );
 
-export const User = model("User", userSchema);
+export const DbUser = model("User", userSchema);
 
 
 const sessionTokenSchema = new Schema(
@@ -26,7 +26,7 @@ const sessionTokenSchema = new Schema(
   { timestamps: true }
 );
 
-export const SessionToken = model("SessionToken", sessionTokenSchema);
+export const DbSessionToken = model("SessionToken", sessionTokenSchema);
 
 const groupSchema = new Schema(
   {
@@ -39,7 +39,7 @@ const groupSchema = new Schema(
   }
 );
 
-export const Group = model("Group", groupSchema);
+export const DbGroup = model("Group", groupSchema);
 
 const transactionSchema = new Schema(
   {
@@ -52,15 +52,4 @@ const transactionSchema = new Schema(
   { timestamps: true }
 );
 
-export const Transaction = model("Transaction", transactionSchema)
-
-const friendRequestSchema = new Schema(
-  {
-    from: {type: Types.ObjectId, ref: "User", required: true},
-    to: {type: Types.ObjectId, ref: "User", required: true},
-    status: {type: String, enum: ["Pending, Accepted"], default: "Pending"}
-  },
-  {timestamps: true}
-);
-
-export const FriendRequest = model("FriendRequest", friendRequestSchema)
+export const DbTransaction = model("Transaction", transactionSchema)

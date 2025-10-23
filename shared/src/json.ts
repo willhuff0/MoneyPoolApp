@@ -1,7 +1,7 @@
 export interface SessionToken {
     userId: string,
     displayName: string,
-    timestamp: Date,
+    timestamp: string,
     ip: string,
     claims: string[],
 }
@@ -25,7 +25,7 @@ export interface Transaction {
     transactionId: string,
     groupId: string,
     userId: string,
-    timestamp: Date,
+    timestamp: string,
     amount: number,
     description: string,
 }

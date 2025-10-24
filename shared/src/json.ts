@@ -1,6 +1,5 @@
 export interface SessionToken {
     userId: string,
-    displayName: string,
     timestamp: string,
     ip: string,
     claims: string[],
@@ -8,8 +7,8 @@ export interface SessionToken {
 
 export interface User {
     userId: string,
-    displayName: string,
     userName: string,
+    displayName: string,
     chompScore: number,
 }
 

@@ -1,32 +1,29 @@
 import { Schema, model, Types } from "mongoose";
 
-const userSchema = new Schema(
-    {
-      user_id : {type: Number, required: true, unique: true},
-      username : {type: String, required: true, unique: true},
-      name : {type: String, required: true},
-      chomp_score : {type: Number, required: true},
-      friends : [{type: Types.ObjectId, ref: "User"}]
-    },
-    {timestamps: true}
+export interface DbUser {
+  userId: string;
+  userName: string,
+  email: string,
+  displayName: string,
+  passwordDigest: string,
+  groups: string[],
+  friends: string[],
+  incomingFriendRequests: string[],
+  chompScore: number,
+}
+const userSchema = new Schema({
+      _id: { type: String, required: true, unique: true, },
+      userName: { type: String, required: true },
+      email: { type: String, required: true },
+      displayName: { type: String, required: true },
+      passwordDigest: { type: String, required: true },
+      groups: [String],
+      friends: [String],
+      incomingFriendRequests: [String],
+      chompScore: { type: Number, required: true },
+    }, { timestamps: true }
 );
-
-export const DbUser = model("User", userSchema);
-
-
-const sessionTokenSchema = new Schema(
-  {
-    user_id: { type: Number, required: true, unique: true },
-    name: { type: String, required: true }, 
-    time: { type: Date, default: Date.now },  
-    ip: { type: String, required: false },
-    claims: { type: Object, default: {} }, 
-    signature: { type: String, required: true }
-  },
-  { timestamps: true }
-);
-
-export const DbSessionToken = model("SessionToken", sessionTokenSchema);
+export const DbUserModel = model("User", userSchema);
 
 const groupSchema = new Schema(
   {

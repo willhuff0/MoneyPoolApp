@@ -4,7 +4,7 @@ import { v7 as uuidv7 } from 'uuid';
 import { validateDisplayName, validateEmail, validatePassword, validateUserName } from '@shared/validation';
 import * as Protocol from '@shared/protocol';
 
-import { UserDao, UserNameTakenError } from 'src/dao/user-dao';
+import { UserDao, UserNameTakenError } from 'src/daos/user-dao';
 import { HashedUserPassword } from 'src/security/hashed-user-password';
 import { SessionAuthority } from 'src/security/session-authority';
 import { DbUser } from 'src/models'

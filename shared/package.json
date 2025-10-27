@@ -1,5 +1,5 @@
 {
-  "name": "shared",
+  "name": "money-pool-app-shared",
   "version": "1.0.0",
   "description": "",
   "main": "dist/index.js",
@@ -12,5 +12,8 @@
   "type": "commonjs",
   "devDependencies": {
     "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "email-validator": "^2.0.4"
   }
 }

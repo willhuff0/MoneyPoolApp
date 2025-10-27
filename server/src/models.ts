@@ -1,39 +1,52 @@
 import { Schema, model, Types } from "mongoose";
 
-const userSchema = new Schema(
-    {
-        user_id : {type: Number, required: true, unique: true},
-        name : {type: String, required: true},
-        chomp_score : {type: Number, required: true}
+export interface DbUser {
+  userId: string;
+  userName: string,
+  email: string,
+  displayName: string,
+  passwordDigest: string,
+  groups: string[],
+  friends: string[],
+  incomingFriendRequests: string[],
+  chompScore: number,
+}
+const userSchema = new Schema({
+      _id: { type: String, required: true, unique: true, },
+      userName: { type: String, required: true },
+      email: { type: String, required: true },
+      displayName: { type: String, required: true },
+      passwordDigest: { type: String, required: true },
+      groups: [String],
+      friends: [String],
+      incomingFriendRequests: [String],
+      chompScore: { type: Number, required: true },
+    }, { timestamps: true }
+);
+export const DbUserModel = model("User", userSchema);
 
-    },
-    {timestamps: true}
+const groupSchema = new Schema(
+  {
+
+    group_id: {type : Number, required: true, unique:true},
+    name: {type: String, required: true},
+    owner: { type: Types.ObjectId, ref: "User", required: true },
+    members: [{ type: Types.ObjectId, ref: "User" }],
+    balance: {type : Number, required: true}
+  }
 );
 
-export const User = model("User", userSchema);
+export const DbGroup = model("Group", groupSchema);
 
-
-const sessionTokenSchema = new Schema(
+const transactionSchema = new Schema(
   {
-    user_id: { type: Number, required: true, unique: true },
-    name: { type: String, required: true }, 
-    time: { type: Date, default: Date.now },  
-    ip: { type: String, required: false },
-    claims: { type: Object, default: {} }, 
-    signature: { type: String, required: true }
+    transaction_id: {type: Number, required: true, unique:true},
+    group_id: {type: Types.ObjectId, ref: "Group", required:true},
+    user_id: {type: Types.ObjectId, ref: "User", required:true},
+    amount: {type: Number, required:true},
+    description: {type: String, required: true}
   },
   { timestamps: true }
 );
 
-export const SessionToken = model("SessionToken", sessionTokenSchema);
-
-const groupSchema = new Schema(
-    {
-
-        group_id: {type : Number, required: true, unique:true},
-        name: {type: String, required: true},
-        owner: { type: Types.ObjectId, ref: "User", required: true },
-        members: [{ type: Types.ObjectId, ref: "User" }],
-        balance: {type : Number, required: true}
-    }
-);
+export const DbTransaction = model("Transaction", transactionSchema)

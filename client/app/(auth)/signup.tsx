@@ -1,88 +1,68 @@
-import { useLocalSearchParams } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Alert, Pressable, Text, TextInput, View } from "react-native";
-import AuthBackground from "../../components/AuthBackground";
+// client/app/(auth)/signup.tsx
+import { router } from "expo-router";
+import { useState } from "react";
+import { Alert, Pressable, Text, TextInput, View } from "react-native";
+import AuthBg from "../../components/AuthBg";
 import AuthCard from "../../components/AuthCard";
-import { useDebouncedValue } from "../../hooks/useDebouncedValue";
-import { normalizeUsername } from "../../utils/ident";
-
-const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/;
+import { register } from "../../lib/api";
 
 export default function SignupScreen() {
-  const params = useLocalSearchParams<{ email?: string; username?: string }>();
-  const [email, setEmail] = useState(() => (typeof params.email === "string" ? params.email : ""));
-  const [username, setUsername] = useState(() =>
-    typeof params.username === "string" ? params.username.toLowerCase() : ""
-  );
   const [displayName, setDisplayName] = useState("");
-  const [pw, setPw] = useState("");
-  const [pw2, setPw2] = useState("");
-
-  const normalized = useMemo(() => normalizeUsername(username), [username]);
-  const debounced = useDebouncedValue(normalized, 450);
-  const [checking, setChecking] = useState(false);
-  const [available, setAvailable] = useState<boolean | null>(null);
-  const [submitting, setSubmitting] = useState(false);
-
-  // Placeholder availability (until backend auth exists)
-  useEffect(() => {
-    setAvailable(null);
-    if (!USERNAME_RE.test(debounced)) return;
-    setChecking(true);
-    const id = setTimeout(() => { setAvailable(true); setChecking(false); }, 350);
-    return () => clearTimeout(id);
-  }, [debounced]);
-
-  const canSubmit =
-    email.trim() &&
-    USERNAME_RE.test(normalized) &&
-    available !== false &&
-    displayName.trim().length > 0 &&
-    pw.length >= 8 &&
-    pw === pw2 &&
-    !submitting;
+  const [userName, setUserName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [busy, setBusy] = useState(false);
 
   const onSignup = async () => {
-    if (!canSubmit) return;
-    //call createUser({ display_name: displayName, user_name: normalized, email, password: pw })
-    Alert.alert("Demo", `Would create account:\nusername=${normalized}\nname=${displayName}\nemail=${email}`);
+    if (!displayName.trim() || !userName.trim() || !email.trim() || !password.trim()) {
+      Alert.alert("Missing info", "Please complete all fields.");
+      return;
+    }
+
+    try {
+      setBusy(true);
+      await register({ displayName: displayName.trim(), userName: userName.trim(), email: email.trim(), password });
+      // Token stored automatically by api.ts if backend returns it
+      Alert.alert("Success", "Account created!");
+      // Navigate to your main app screen (tabs/root)
+      router.replace("/");
+    } catch (e: any) {
+      Alert.alert("Signup failed", e?.message ?? "Unknown error");
+    } finally {
+      setBusy(false);
+    }
   };
 
-  const usernameHint =
-    !USERNAME_RE.test(normalized) ? "3–20 letters, numbers, or underscores"
-    : checking ? "Checking…"
-    : available === false ? "✗ Username taken"
-    : "✓ Username looks good";
-
   return (
-    <AuthBackground>
+    <AuthBg>
       <AuthCard>
         <View style={{ gap: 12 }}>
-          <Text style={{ fontSize: 18, fontWeight: "700" }}>Create your account</Text>
-
-          <Text>Username</Text>
-          <TextInput
-            placeholder="e.g., devina_t"
-            autoCapitalize="none"
-            value={username}
-            onChangeText={setUsername}
-            style={{ borderWidth: 1, borderRadius: 10, padding: 12 }}
-          />
-          <Text style={{ color: available === false ? "crimson" : "#16a34a" }}>{usernameHint}</Text>
+          <Text style={{ fontSize: 18, fontWeight: "700" }}>Create account</Text>
 
           <Text>Display Name</Text>
           <TextInput
             placeholder="Devina Tikkoo"
+            autoCapitalize="words"
             value={displayName}
             onChangeText={setDisplayName}
+            style={{ borderWidth: 1, borderRadius: 10, padding: 12 }}
+          />
+
+          <Text>Username</Text>
+          <TextInput
+            placeholder="devina_t"
+            autoCapitalize="none"
+            value={userName}
+            onChangeText={setUserName}
             style={{ borderWidth: 1, borderRadius: 10, padding: 12 }}
           />
 
           <Text>Email</Text>
           <TextInput
             placeholder="you@ufl.edu"
-            autoCapitalize="none"
             keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
             value={email}
             onChangeText={setEmail}
             style={{ borderWidth: 1, borderRadius: 10, padding: 12 }}
@@ -92,34 +72,33 @@ export default function SignupScreen() {
           <TextInput
             placeholder="••••••••"
             secureTextEntry
-            value={pw}
-            onChangeText={setPw}
-            style={{ borderWidth: 1, borderRadius: 10, padding: 12 }}
-          />
-
-          <Text>Confirm Password</Text>
-          <TextInput
-            placeholder="••••••••"
-            secureTextEntry
-            value={pw2}
-            onChangeText={setPw2}
+            autoCapitalize="none"
+            value={password}
+            onChangeText={setPassword}
             style={{ borderWidth: 1, borderRadius: 10, padding: 12 }}
           />
 
           <Pressable
-            disabled={!canSubmit}
             onPress={onSignup}
+            disabled={busy}
             style={{
-              backgroundColor: canSubmit ? "#1428A0" : "#94a3b8",
-              padding: 14, borderRadius: 10, alignItems: "center",
-              marginTop: 8, flexDirection: "row", gap: 8, justifyContent: "center"
+              backgroundColor: busy ? "#94a3b8" : "#1428A0",
+              padding: 14,
+              borderRadius: 10,
+              alignItems: "center",
+              marginTop: 8,
             }}
           >
-            {submitting ? <ActivityIndicator color="#fff" /> : null}
-            <Text style={{ color: "white", fontWeight: "600" }}>Sign Up</Text>
+            <Text style={{ color: "white", fontWeight: "600" }}>
+              {busy ? "Creating…" : "Create account"}
+            </Text>
+          </Pressable>
+
+          <Pressable onPress={() => router.back()} style={{ alignItems: "center", padding: 8 }}>
+            <Text style={{ color: "#1428A0" }}>Back</Text>
           </Pressable>
         </View>
       </AuthCard>
-    </AuthBackground>
+    </AuthBg>
   );
 }

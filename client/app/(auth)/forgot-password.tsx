@@ -1,23 +1,47 @@
-//Forgot password screen 
-import { useState } from "react";
+//Forgot password screen
+import { router, useLocalSearchParams } from "expo-router";
+import { useEffect, useState } from "react";
 import { Alert, Pressable, Text, TextInput, View } from "react-native";
-import AuthBackground from "../../components/AuthBackground";
+import AuthBg from "../../components/AuthBg";
 import AuthCard from "../../components/AuthCard";
+import { requestPasswordReset } from "../../lib/api";
+import { isEmail } from "../../utils/ident";
 
 export default function ForgotPasswordScreen() {
+  //Have pre-filled email 
+  const { value, type } = useLocalSearchParams<{ value?: string; type?: string }>();
   const [email, setEmail] = useState("");
 
-  const onSubmit = () => {
-    if (!email.trim()) {
-      Alert.alert("Enter your email");
+  useEffect(() => {
+    if (type === "email" && typeof value === "string" && isEmail(value)) {
+      setEmail(value);
+    }
+  }, [type, value]);
+
+  const onSubmit = async () => {
+    const trimmed = email.trim();
+    if (!trimmed || !isEmail(trimmed)) {
+      Alert.alert("Enter a valid email");
       return;
     }
-    //Backend 
-    Alert.alert("Demo", `Would request reset for ${email}`);
+    try {
+      await requestPasswordReset({ email: trimmed });
+      Alert.alert(
+        "Check your inbox",
+        "If an account exists for that email, you’ll receive reset instructions.",
+        [{ text: "OK", onPress: () => router.back() }]
+      );
+    } catch (e: any) {
+      //Instructions message
+      Alert.alert(
+        "Check your inbox",
+        "If an account exists for that email, you’ll receive reset instructions."
+      );
+    }
   };
 
   return (
-    <AuthBackground>
+    <AuthBg>
       <AuthCard>
         <View style={{ gap: 12 }}>
           <Text style={{ fontSize: 18, fontWeight: "700" }}>Forgot password</Text>
@@ -44,8 +68,12 @@ export default function ForgotPasswordScreen() {
           >
             <Text style={{ color: "white", fontWeight: "600" }}>Submit</Text>
           </Pressable>
+
+          <Pressable onPress={() => router.back()} style={{ alignItems: "center", padding: 8 }}>
+            <Text style={{ color: "#1428A0" }}>Back</Text>
+          </Pressable>
         </View>
       </AuthCard>
-    </AuthBackground>
+    </AuthBg>
   );
 }

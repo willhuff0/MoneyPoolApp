@@ -5,7 +5,7 @@
 import { ReactNode } from "react";
 import { Platform, Text, View } from "react-native";
 
-export default function AuthBackground({
+export default function AuthBg({
   title = "Chomp Change",
   children,
 }: { title?: string; children: ReactNode }) {

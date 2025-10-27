@@ -1,6 +1,10 @@
-export function isEmail(value: string) {
-  return /^\S+@\S+\.\S+$/.test(value);
+
+export function isEmail(s: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.trim());
 }
-export function normalizeUsername(value: string) {
-  return value.trim().toLowerCase();
+
+//All lowercase
+export function normalizeUsername(s: string): string {
+  const trimmed = s.trim().toLowerCase();
+  return trimmed.replace(/[.\s]+/g, "_");
 }

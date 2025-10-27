@@ -1,11 +1,19 @@
 import { Stack } from "expo-router";
 
 export default function AuthLayout() {
-    return (
-    <Stack screenOptions={{ headerTitleAlign: "center" }}>
-      <Stack.Screen name="index" options={{ title: "Sign In" }} />
-      <Stack.Screen name="password" options={{ title: "Enter Password" }} />
-      <Stack.Screen name="signup" options={{ title: "Create Account" }} />
-      <Stack.Screen name="forgot-password" options={{ title: "Forgot Password" }} />
-    </Stack>)
+  return (
+    //Tabs to go through 
+    <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: "#0A2463" } }}>
+      <Stack.Screen name="index" />
+      <Stack.Screen name="password" />
+      <Stack.Screen name="signup" />
+      <Stack.Screen name="forgot-password" />
+    </Stack>
+  );
 }
+
+//Flow 
+//Index screen 
+//If username/email found, go to password page
+//Else sign up
+//If on password page and forgot password, go to password page

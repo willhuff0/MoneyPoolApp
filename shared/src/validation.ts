@@ -1,26 +1,25 @@
 import * as EmailValidator from 'email-validator';
 
-const displayNameMinLength = 2;
-const displayNameMaxLength = 64;
-
-const userNameMinLength = 2;
-const userNameMaxLength = 24;
-
-const passwordMinLength = 8;
-const passwordMaxLength = 64;
+const displayNamePattern = new RegExp("/^\S.{0,62}\S$/");
+const userNamePattern = new RegExp("/^[0-9A-Za-z]{6,16}$/");
+const passwordPattern = new RegExp("/^.{8,32}$/");
 
 export const validateDisplayName = (displayName: string): boolean => {
-    return displayName.length >= displayNameMinLength && displayName.length <= displayNameMaxLength;
+    if (typeof displayName !== "string") return false;
+    return displayNamePattern.test(displayName);
 }
 
 export const validateUserName = (userName: string): boolean => {
-    return userName.length >= userNameMinLength && userName.length <= userNameMaxLength;
+    if (typeof userName !== "string") return false;
+    return userNamePattern.test(userName);
 }
 
 export const validateEmail = (email: string): boolean => {
+    if (typeof email !== "string") return false;
     return EmailValidator.validate(email);
 }
 
 export const validatePassword = (password: string): boolean => {
-    return password.length >= passwordMinLength && password.length <= passwordMaxLength;
+    if (typeof password !== "string") return false;
+    return passwordPattern.test(password);
 }

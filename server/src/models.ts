@@ -1,33 +1,29 @@
 import { Schema, model, Types } from "mongoose";
 
-const userSchema = new Schema(
-    {
-      user_id : {type: Number, required: true, unique: true},
-      username : {type: String, required: true, unique: true},
-      password : {type: String, required:true},
-      name : {type: String, required: true},
-      chomp_score : {type: Number, required: true},
-      friends : [{type: Types.ObjectId, ref: "User"}]
-    },
-    {timestamps: true}
+export interface DbUser {
+  userId: string;
+  userName: string,
+  email: string,
+  displayName: string,
+  passwordDigest: string,
+  groups: string[],
+  friends: string[],
+  incomingFriendRequests: string[],
+  chompScore: number,
+}
+const userSchema = new Schema({
+      _id: { type: String, required: true, unique: true, },
+      userName: { type: String, required: true },
+      email: { type: String, required: true },
+      displayName: { type: String, required: true },
+      passwordDigest: { type: String, required: true },
+      groups: [String],
+      friends: [String],
+      incomingFriendRequests: [String],
+      chompScore: { type: Number, required: true },
+    }, { timestamps: true }
 );
-
-export const User = model("User", userSchema);
-
-
-const sessionTokenSchema = new Schema(
-  {
-    user_id: { type: Number, required: true, unique: true },
-    name: { type: String, required: true }, 
-    time: { type: Date, default: Date.now },  
-    ip: { type: String, required: false },
-    claims: { type: Object, default: {} }, 
-    signature: { type: String, required: true }
-  },
-  { timestamps: true }
-);
-
-export const SessionToken = model("SessionToken", sessionTokenSchema);
+export const DbUserModel = model("User", userSchema);
 
 const groupSchema = new Schema(
   {
@@ -40,7 +36,7 @@ const groupSchema = new Schema(
   }
 );
 
-export const Group = model("Group", groupSchema);
+export const DbGroup = model("Group", groupSchema);
 
 const transactionSchema = new Schema(
   {
@@ -53,15 +49,4 @@ const transactionSchema = new Schema(
   { timestamps: true }
 );
 
-export const Transaction = model("Transaction", transactionSchema)
-
-const friendRequestSchema = new Schema(
-  {
-    from: {type: Types.ObjectId, ref: "User", required: true},
-    to: {type: Types.ObjectId, ref: "User", required: true},
-    status: {type: String, enum: ["Pending, Accepted"], default: "Pending"}
-  },
-  {timestamps: true}
-);
-
-export const FriendRequest = model("FriendRequest", friendRequestSchema)
+export const DbTransaction = model("Transaction", transactionSchema)

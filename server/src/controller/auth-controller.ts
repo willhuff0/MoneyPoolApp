@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { v7 as uuidv7 } from 'uuid';
 
 import { validateDisplayName, validateEmail, validatePassword, validateUserName } from '@shared/validation';
+import * as Protocol from '@shared/protocol';
 
 import { UserDao, UserNameTakenError } from 'src/dao/user-dao';
 import { HashedUserPassword } from 'src/security/hashed-user-password';
@@ -18,12 +19,7 @@ export class AuthController {
     }
     
     public createUser = async (req: Request, res: Response): Promise<void> => {
-        const body: {
-            displayName: string,
-            userName: string,
-            email: string,
-            password: string,
-        } = req.body;
+        const body: Protocol.AuthCreateUserRequest = req.body;
 
         if (!validateDisplayName(body.displayName)) {
             res.status(400).end();
@@ -55,7 +51,7 @@ export class AuthController {
             )
         } catch(e) {
             if (e instanceof UserNameTakenError) {
-                res.status(403).json({ message: "userName must be unique" });
+                res.status(403).json({ message: "userName must be unique" } as Protocol.ErrorResponse);
                 return;
             }
 
@@ -77,15 +73,11 @@ export class AuthController {
             ip: ip,
             claims: [],
         });
-        res.status(200).json({ token: encodedSessionToken });
+        res.status(200).json({ token: encodedSessionToken } as Protocol.AuthCreateUserResponse);
     }
 
     public startSession = async (req: Request, res: Response): Promise<void> => {
-        const body: {
-            userName?: string,
-            email?: string,
-            password: string,
-        } = req.body;
+        const body: Protocol.AuthStartSessionRequest = req.body;
 
         if (body.userName != undefined && body.email != undefined) {
             res.status(400).json({ message: "Only one of userName or email must be specified" });
@@ -113,7 +105,7 @@ export class AuthController {
             dbUser = await this.userDao.getUserByEmail(body.email);
         }
         if (dbUser === undefined) {
-            res.status(400).json({ message: "One of userName or email must be specified" });
+            res.status(400).json({ message: "One of userName or email must be specified" } as Protocol.ErrorResponse);
             return
         }
         if (dbUser == null) {
@@ -145,6 +137,6 @@ export class AuthController {
             userName: dbUser.userName,
             displayName: dbUser.displayName,
             chompScore: dbUser.chompScore,
-        });
+        } as Protocol.AuthStartSessionResponse);
     }
 }

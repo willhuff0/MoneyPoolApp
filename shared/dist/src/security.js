@@ -1,0 +1,1 @@
+export const sessionTokenLifetime = 8.0;

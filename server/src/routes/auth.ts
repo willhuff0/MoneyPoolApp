@@ -1,16 +1,17 @@
 import { Router } from "express";
 
-const router = Router();
+import { AuthController } from "../controllers/auth-controller";
+import { UserDao } from "../daos/user-dao";
+import { SessionAuthority } from "../security/session-authority";
 
-router.post("/register", async(req, res) => {
-    //this is where i call the controller
-});
+export const getAuthRouter = (sessionAuthority: SessionAuthority): Router => {
+    const router = Router();
 
-router.post("/login", async(req, res) => {
-    // this is where i call the controller
-});
+    const userDao = new UserDao();
+    const controller = new AuthController(userDao, sessionAuthority);
 
-router.post("/logout-all", async(req, res) => {
-    // this is where i call the controller
-})
-export default Router;
+    router.all("/createUser", controller.createUser);
+    router.all("/startSession", controller.startSession);
+
+    return router;
+}

@@ -1,13 +1,13 @@
 import { Request, Response } from 'express';
 import { v7 as uuidv7 } from 'uuid';
 
-import { validateDisplayName, validateEmail, validatePassword, validateUserName } from '@shared/validation';
-import * as Protocol from '@shared/protocol';
+import { validateDisplayName, validateEmail, validatePassword, validateUserName } from '@money-pool-app/shared';
+import * as Protocol from '@money-pool-app/shared';
 
-import { UserDao, UserNameTakenError } from 'src/daos/user-dao';
-import { HashedUserPassword } from 'src/security/hashed-user-password';
-import { SessionAuthority } from 'src/security/session-authority';
-import { DbUser } from 'src/models'
+import { UserDao, UserNotUniqueError } from '../daos/user-dao';
+import { HashedUserPassword } from '../security/hashed-user-password';
+import { SessionAuthority } from '../security/session-authority';
+import { DbUser } from '../models'
 
 export class AuthController {
     userDao: UserDao;
@@ -19,22 +19,22 @@ export class AuthController {
     }
     
     public createUser = async (req: Request, res: Response): Promise<void> => {
-        const body: Protocol.AuthCreateUserRequest = req.body;
+        const body: Protocol.AuthCreateUserRequest = req.body ?? {};
 
         if (!validateDisplayName(body.displayName)) {
-            res.status(400).end();
+            res.status(400).json({ message: "displayName failed validation" } as Protocol.ErrorResponse);
             return;
         }
         if (!validateUserName(body.userName)) {
-            res.status(400).end();
+            res.status(400).json({ message: "userName failed validation" } as Protocol.ErrorResponse);
             return;
         }
         if (!validateEmail(body.email)) {
-            res.status(400).end();
+            res.status(400).json({ message: "email failed validation" } as Protocol.ErrorResponse);
             return;
         }
         if (!validatePassword(body.password)) {
-            res.status(400).end();
+            res.status(400).json({ message: "password failed validation" } as Protocol.ErrorResponse);
             return;
         }
 
@@ -44,14 +44,14 @@ export class AuthController {
         try {
             await this.userDao.createUser(
                 userId,
-                body.displayName,
                 body.userName,
                 body.email,
+                body.displayName,
                 hashedUserPassword.digest,
             )
         } catch(e) {
-            if (e instanceof UserNameTakenError) {
-                res.status(403).json({ message: "userName must be unique" } as Protocol.ErrorResponse);
+            if (e instanceof UserNotUniqueError) {
+                res.status(403).json({ code: 1, message: "userName or email is already taken" } as Protocol.ErrorResponse);
                 return;
             }
 
@@ -126,7 +126,7 @@ export class AuthController {
         }
 
         const encodedSessionToken = this.sessionAuthority.signAndEncodeToken({
-            userId: dbUser.userId,
+            userId: dbUser._id,
             timestamp: new Date().toISOString(),
             ip: ip,
             claims: [],

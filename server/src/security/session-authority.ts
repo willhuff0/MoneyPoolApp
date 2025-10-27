@@ -1,15 +1,14 @@
-import { createHmac, Hmac, KeyObject, randomBytes, sign, timingSafeEqual } from 'crypto';
+import { createHmac, createSecretKey, KeyObject, randomBytes, timingSafeEqual } from 'crypto';
 
-import { SessionToken } from '@shared/json'
-import { sessionTokenLifetime } from '@shared/security'
+import { SessionToken, sessionTokenLifetime } from '@money-pool-app/shared'
 
 const tokenNonceLength = 32;
 
 export class SessionAuthority {
     privateKey: KeyObject;
 
-    constructor(privateKey: KeyObject) {
-        this.privateKey = privateKey;
+    constructor(privateKey?: KeyObject) {
+        this.privateKey = privateKey ?? createSecretKey(process.env.PRIVATE_KEY ?? this.generateSecureRandomString(256), "utf8");
     }
 
     private generateSecureRandomString = (length: number): string => {

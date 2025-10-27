@@ -1,8 +1,8 @@
 import type { Request, Response, NextFunction } from "express";
 
-import { SessionAuthority } from 'src/security/session-authority';
+import { SessionAuthority } from '../security/session-authority';
 
-class AuthMiddleware {
+export class AuthMiddleware {
   sessionAuthority: SessionAuthority;
 
   constructor(sessionAuthority: SessionAuthority) {

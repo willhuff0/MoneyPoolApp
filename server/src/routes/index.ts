@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { SessionAuthority } from "../security/session-authority";
+import { TokenAuthority } from "../security/token-authority";
 import { AuthMiddleware } from "../middleware/auth-middleware";
 
 import { getAuthRouter } from "./auth";
@@ -8,7 +8,7 @@ import { getAuthRouter } from "./auth";
 // import groupRoutes from "./groups.js";
 // import transactionRoutes from "./transactions.js";
 
-export const getApiRouter = (sessionAuthority: SessionAuthority): Router => {
+export const getApiRouter = (sessionAuthority: TokenAuthority): Router => {
     const api = Router();
 
     api.use("/auth", getAuthRouter(sessionAuthority));

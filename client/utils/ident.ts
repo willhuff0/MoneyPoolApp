@@ -1,7 +1,4 @@
 
-export function isEmail(s: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.trim());
-}
 
 //All lowercase
 export function normalizeUsername(s: string): string {

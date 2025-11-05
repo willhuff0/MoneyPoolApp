@@ -3,7 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 
 import initDb from "./config/db";
-import { SessionAuthority } from "./security/session-authority";
+import { TokenAuthority } from "./security/token-authority";
 import { getApiRouter } from "./routes/index";
 import { catchAllMiddleware, notFoundMiddleware } from "./middleware/error-middleware";
 
@@ -20,7 +20,7 @@ import { catchAllMiddleware, notFoundMiddleware } from "./middleware/error-middl
   app.use(cors());
   app.use(express.json());
 
-  const sessionAuthority = new SessionAuthority();
+  const sessionAuthority = new TokenAuthority();
   app.use(getApiRouter(sessionAuthority));
 
   app.use(notFoundMiddleware);

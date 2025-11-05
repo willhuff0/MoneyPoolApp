@@ -1,11 +1,12 @@
-import { Schema, model, Types } from "mongoose";
+import { Schema, model, Types, HydratedDocument } from "mongoose";
 
-export interface DbUser {
+interface DbUser {
   _id: string;
   userName: string,
   email: string,
   displayName: string,
   passwordDigest: string,
+  allowRefreshTokensCreatedAfter: Date,
   groups: string[],
   friends: string[],
   incomingFriendRequests: string[],
@@ -17,13 +18,15 @@ const userSchema = new Schema({
       email: { type: String, required: true, unique: true },
       displayName: { type: String, required: true },
       passwordDigest: { type: String, required: true },
+      allowRefreshTokensCreatedAfter: { type: Date, required: true },
       groups: [String],
       friends: [String],
       incomingFriendRequests: [String],
       chompScore: { type: Number, required: true },
     }, { timestamps: true }
 );
-export const DbUserModel = model("User", userSchema);
+export const UserModel = model("User", userSchema);
+export type UserDocument = HydratedDocument<DbUser>;
 
 // const groupSchema = new Schema(
 //   {

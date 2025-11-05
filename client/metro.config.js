@@ -1,6 +1,6 @@
 // Expo monorepo Metro config to allow imports from workspace packages
-import { getDefaultConfig } from 'expo/metro-config';
-import path from 'path';
+const { getDefaultConfig } = require('expo/metro-config');
+const path = require('path');
 
 const projectRoot = __dirname;
 const workspaceRoot = path.resolve(projectRoot, '..');
@@ -19,5 +19,4 @@ config.resolver.nodeModulesPaths = [
 // 3. Avoid Metro walking up directories in odd ways; rely on paths above
 config.resolver.disableHierarchicalLookup = true;
 
-export default config;
-
+module.exports = config;

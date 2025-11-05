@@ -1,14 +1,17 @@
+import { ApiProvider } from "@/api/api-provider";
 import { Stack } from "expo-router";
 
 export default function AuthLayout() {
   return (
     //Tabs to go through 
-    <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: "#0A2463" } }}>
-      <Stack.Screen name="index" />
-      <Stack.Screen name="password" />
-      <Stack.Screen name="signup" />
-      <Stack.Screen name="forgot-password" />
-    </Stack>
+    <ApiProvider>
+      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: "#0A2463" } }}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="password" />
+        <Stack.Screen name="signup" />
+        <Stack.Screen name="forgot-password" />
+      </Stack>
+    </ApiProvider>
   );
 }
 

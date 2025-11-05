@@ -1,4 +1,5 @@
-import { DbUser, DbUserModel } from '../models';
+import { defaultChompScore } from '@money-pool-app/shared';
+import { UserModel, UserDocument } from '../models';
 
 export class UserNotUniqueError extends Error {
     constructor(message: string) {
@@ -8,18 +9,19 @@ export class UserNotUniqueError extends Error {
 }
 
 export class UserDao {
-    public createUser = async (userId: string, userName: string, email: string, displayName: string, passwordDigest: string): Promise<void> => {
+    public createUser = async (userId: string, userName: string, email: string, displayName: string, passwordDigest: string, timestamp: Date): Promise<void> => {
         try {
-            const newUser = new DbUserModel({
+            const newUser = new UserModel({
                 _id: userId,
                 userName: userName,
                 email: email,
                 displayName: displayName,
                 passwordDigest: passwordDigest,
+                allowRefreshTokensCreatedAfter: timestamp,
                 groups: [],
                 friends: [],
                 incomingFriendRequests: [],
-                chompScore: 0,
+                chompScore: defaultChompScore,
             });
 
             await newUser.save();
@@ -34,15 +36,20 @@ export class UserDao {
         }
     }
 
-    public getUserById = async (userId: string): Promise<DbUser | null> => {
-        return await DbUserModel.findById(userId).lean();
+    public getUserById = async (userId: string): Promise<UserDocument | null> => {
+        return await UserModel.findById(userId);
     }
 
-    public getUserByUserName = async (userName: string): Promise<DbUser | null> => {
-        return await DbUserModel.findOne({ userName: userName }).lean();
+    public getUserByUserName = async (userName: string): Promise<UserDocument | null> => {
+        return await UserModel.findOne({ userName: userName });
     }
 
-    public getUserByEmail = async (email: string): Promise<DbUser | null> => {
-        return await DbUserModel.findOne({ email: email }).lean();
+    public getUserByEmail = async (email: string): Promise<UserDocument | null> => {
+        return await UserModel.findOne({ email: email });
+    }
+
+    public invalidateUserTokens = async (userDocument: UserDocument): Promise<void> => {
+        userDocument.allowRefreshTokensCreatedAfter = new Date();
+        await userDocument.save();
     }
 }

@@ -4,9 +4,12 @@ import { useState } from "react";
 import { Alert, Pressable, Text, TextInput, View } from "react-native";
 import AuthBg from "../../components/AuthBg";
 import AuthCard from "../../components/AuthCard";
-import { login } from "../../lib/api";
+import { validatePassword } from "@money-pool-app/shared";
+import { useApi } from "@/api/api-provider";
 
 export default function PasswordScreen() {
+  const api = useApi();
+
   // params from identifier screen
   const { type, value } = useLocalSearchParams<{ type?: string; value?: string }>();
 
@@ -22,6 +25,10 @@ export default function PasswordScreen() {
       Alert.alert("Missing password", "Please enter your password.");
       return;
     }
+    if (!validatePassword(password.trim())) {
+      Alert.alert("Invalid info", "Password is invalid.");
+      return;
+    }
 
     try {
       setBusy(true);
@@ -30,12 +37,13 @@ export default function PasswordScreen() {
           ? { email: String(value), password }
           : { userName: String(value), password };
 
-      const res = await login(payload);
-      // Token saved automatically in AsyncStorage
-      Alert.alert("Welcome!", `Logged in as ${res.displayName}`);
-      router.replace("/"); 
-    } catch (e: any) {
-      Alert.alert("Login failed", e?.message ?? "Unknown error");
+      if (await api.signIn(payload)) {
+        // Token saved automatically
+        Alert.alert("Welcome!", `Logged in as ${api.activeUser?.displayName}`);
+        router.replace("/"); 
+      } else {
+        Alert.alert("Login failed", "Password is incorrect.");
+      }
     } finally {
       setBusy(false);
     }

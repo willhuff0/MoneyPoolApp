@@ -1,15 +1,54 @@
 {
-  "name": "money-pool-app-shared",
+  "name": "@money-pool-app/shared",
   "version": "1.0.0",
   "description": "",
   "main": "dist/index.js",
+  "react-native": "src/index.ts",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "prepare": "tsc"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "react-native": "./src/index.ts",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./validation": {
+      "types": "./dist/validation.d.ts",
+      "react-native": "./src/validation.ts",
+      "require": "./dist/validation.js",
+      "default": "./dist/validation.js"
+    },
+    "./protocol": {
+      "types": "./dist/protocol.d.ts",
+      "react-native": "./src/protocol.ts",
+      "require": "./dist/protocol.js",
+      "default": "./dist/protocol.js"
+    },
+    "./json": {
+      "types": "./dist/json.d.ts",
+      "react-native": "./src/json.ts",
+      "require": "./dist/json.js",
+      "default": "./dist/json.js"
+    },
+    "./security": {
+      "types": "./dist/security.d.ts",
+      "react-native": "./src/security.ts",
+      "require": "./dist/security.js",
+      "default": "./dist/security.js"
+    }
+  },
   "devDependencies": {
     "typescript": "^5.9.3"
   },

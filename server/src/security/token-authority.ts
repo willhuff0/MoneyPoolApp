@@ -1,15 +1,14 @@
-import { createHmac, Hmac, KeyObject, randomBytes, sign, timingSafeEqual } from 'crypto';
+import { createHmac, createSecretKey, KeyObject, randomBytes, timingSafeEqual } from 'crypto';
 
-import { SessionToken } from '@shared/json'
-import { sessionTokenLifetime } from '@shared/security'
+import { RefreshToken, refreshTokenLifetime, SessionToken, sessionTokenLifetime } from '@money-pool-app/shared'
 
 const tokenNonceLength = 32;
 
-export class SessionAuthority {
+export class TokenAuthority {
     privateKey: KeyObject;
 
-    constructor(privateKey: KeyObject) {
-        this.privateKey = privateKey;
+    constructor(privateKey?: KeyObject) {
+        this.privateKey = privateKey ?? createSecretKey(process.env.PRIVATE_KEY ?? this.generateSecureRandomString(256), "utf8");
     }
 
     private generateSecureRandomString = (length: number): string => {
@@ -27,20 +26,20 @@ export class SessionAuthority {
         return timingSafeEqual(actualSignature, claimedSignature);
     }
 
-    public verifyAndDecodeToken = (encodedToken: string): SessionToken | null => {
+    private verifyAndDecodeToken = (encodedToken: string, lifetime: number): any | null => {
         try {
             const encodedParts = encodedToken.split('.');
             if (encodedParts.length != 2) return null;
 
             const bodyBuffer = Buffer.from(encodedParts[0], 'base64');
-            const body = JSON.parse(bodyBuffer.toString('utf8')) as SessionToken;
+            const body = JSON.parse(bodyBuffer.toString('utf8')) as RefreshToken;
 
             // verify timestamp
             const timestampString = body.timestamp;
             if (timestampString == undefined) return null;
             const timestamp = new Date(timestampString);
             if (isNaN(timestamp.getTime())) return null;
-            if (new Date().getTime() - timestamp.getTime() > (sessionTokenLifetime * 3600000)) return null;
+            if (new Date().getTime() - timestamp.getTime() > (lifetime * 3600000)) return null;
 
             // verify signature
             const claimedSignatureBuffer = Buffer.from(encodedParts[1], 'base64');
@@ -53,7 +52,15 @@ export class SessionAuthority {
         }
     }
 
-    public signAndEncodeToken = (token: SessionToken): string => {
+    public verifyAndDecodeRefreshToken = (encodedToken: string): RefreshToken | null => {
+        return this.verifyAndDecodeToken(encodedToken, refreshTokenLifetime);
+    }
+
+    public verifyAndDecodeSessionToken = (encodedToken: string): SessionToken | null => {
+        return this.verifyAndDecodeToken(encodedToken, sessionTokenLifetime);
+    }
+
+    public signAndEncodeToken = (token: any): string => {
         (token as any).nonce = this.generateSecureRandomString(tokenNonceLength);
         
         const bodyBuffer = Buffer.from(JSON.stringify(token), 'utf8');

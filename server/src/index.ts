@@ -1,53 +1,30 @@
 import express from "express";
-import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
-import { User, Group, Transaction, SessionToken } from "./models"
 
-dotenv.config();
+import initDb from "./config/db";
+import { TokenAuthority } from "./security/token-authority";
+import { getApiRouter } from "./routes/index";
+import { catchAllMiddleware, notFoundMiddleware } from "./middleware/error-middleware";
 
-const app = express();
-app.use(cors());
-app.use(express.json());
+(async () => {
+  dotenv.config();
 
-// --- Mongo connection ---
-mongoose.connect(process.env.MONGO_URI!)
-  .then(() => console.log("✅ Mongo connected"))
-  .catch(err => console.error("Mongo error:", err));
+  const app = express();
+  const port = process.env.PORT || 5000;
 
-// --- Example model ---
-import mongoosePkg from "mongoose";
-const todoSchema = new mongoosePkg.Schema({
-  text: { type: String, required: true },
-  done: { type: Boolean, default: false }
-}, { timestamps: true });
-const Todo = mongoosePkg.model("Todo", todoSchema);
+  if (!await initDb()) {
+    process.exit(1);
+  }
 
-// --- REST routes ---
-app.get("/api/todos", async (_req, res) => {
-  const items = await Todo.find().sort({ createdAt: -1 });
-  res.json(items);
-});
+  app.use(cors());
+  app.use(express.json());
 
-app.post("/api/todos", async (req, res) => {
-  const created = await Todo.create({ text: req.body.text });
-  res.status(201).json(created);
-});
+  const sessionAuthority = new TokenAuthority();
+  app.use(getApiRouter(sessionAuthority));
 
-app.patch("/api/todos/:id", async (req, res) => {
-  const updated = await Todo.findByIdAndUpdate(
-    req.params.id,
-    req.body,
-    { new: true }
-  );
-  res.json(updated);
-});
+  app.use(notFoundMiddleware);
+  app.use(catchAllMiddleware);
 
-app.delete("/api/todos/:id", async (req, res) => {
-  await Todo.findByIdAndDelete(req.params.id);
-  res.status(204).end();
-});
-
-// --- start server ---
-const port = process.env.PORT || 5000;
-app.listen(port, () => console.log(`API on http://localhost:${port}`));
+  app.listen(port, () => console.log(`API on http://localhost:${port}`));
+})();

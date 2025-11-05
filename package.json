@@ -1,0 +1,14 @@
+{
+  "name": "money-pool-app-monorepo",
+  "private": true,
+  "workspaces": [
+    "server",
+    "shared",
+    "client"
+  ],
+  "scripts": {
+    "build": "npm run build -w shared && npm run build -w server",
+    "dev:server": "npm run dev -w server",
+    "dev:client": "npm run start -w client"
+  }
+}

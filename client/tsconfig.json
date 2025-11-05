@@ -8,9 +8,6 @@
       ]
     }
   },
-  "references": [
-    { "path": "../shared" }
-  ],
   "include": [
     "**/*.ts",
     "**/*.tsx",

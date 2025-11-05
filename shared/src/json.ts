@@ -1,8 +1,12 @@
 export interface SessionToken {
     userId: string,
     timestamp: string,
-    ip: string,
     claims: string[],
+}
+
+export interface RefreshToken {
+    userId: string,
+    timestamp: string,
 }
 
 export interface User {

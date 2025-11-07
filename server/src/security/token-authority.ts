@@ -1,4 +1,4 @@
-import { createHmac, createSecretKey, KeyObject, randomBytes, timingSafeEqual } from 'crypto';
+import { createHmac, createSecretKey, KeyObject, randomBytes, timingSafeEqual } from 'node:crypto';
 
 import { RefreshToken, refreshTokenLifetime, SessionToken, sessionTokenLifetime } from '@money-pool-app/shared'
 
@@ -11,22 +11,22 @@ export class TokenAuthority {
         this.privateKey = privateKey ?? createSecretKey(process.env.PRIVATE_KEY ?? this.generateSecureRandomString(256), "utf8");
     }
 
-    private generateSecureRandomString = (length: number): string => {
+    private readonly generateSecureRandomString = (length: number): string => {
         return randomBytes(Math.ceil(length / 2)).toString('hex').slice(0, length);
     }
 
-    private generateSignature = (data: Buffer<ArrayBufferLike>): Buffer<ArrayBufferLike> => {
+    private readonly generateSignature = (data: Buffer<ArrayBufferLike>): Buffer<ArrayBufferLike> => {
         const hmac = createHmac('sha256', this.privateKey);
         hmac.update(data);
         return hmac.digest();
     }
 
-    private verifySignature = (data: Buffer<ArrayBufferLike>, claimedSignature: Buffer<ArrayBufferLike>): boolean => {
+    private readonly verifySignature = (data: Buffer<ArrayBufferLike>, claimedSignature: Buffer<ArrayBufferLike>): boolean => {
         const actualSignature = this.generateSignature(data);
         return timingSafeEqual(actualSignature, claimedSignature);
     }
 
-    private verifyAndDecodeToken = (encodedToken: string, lifetime: number): any | null => {
+    private readonly verifyAndDecodeToken = (encodedToken: string, lifetime: number): any => {
         try {
             const encodedParts = encodedToken.split('.');
             if (encodedParts.length != 2) return null;
@@ -38,8 +38,8 @@ export class TokenAuthority {
             const timestampString = body.timestamp;
             if (timestampString == undefined) return null;
             const timestamp = new Date(timestampString);
-            if (isNaN(timestamp.getTime())) return null;
-            if (new Date().getTime() - timestamp.getTime() > (lifetime * 3600000)) return null;
+            if (Number.isNaN(timestamp.getTime())) return null;
+            if (Date.now() - timestamp.getTime() > (lifetime * 3600000)) return null;
 
             // verify signature
             const claimedSignatureBuffer = Buffer.from(encodedParts[1], 'base64');
@@ -61,7 +61,7 @@ export class TokenAuthority {
     }
 
     public signAndEncodeToken = (token: any): string => {
-        (token as any).nonce = this.generateSecureRandomString(tokenNonceLength);
+        token.nonce = this.generateSecureRandomString(tokenNonceLength);
         
         const bodyBuffer = Buffer.from(JSON.stringify(token), 'utf8');
         const signatureBuffer = this.generateSignature(bodyBuffer);

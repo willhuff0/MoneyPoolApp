@@ -9,7 +9,7 @@ export class HashedUserPassword {
         this.digest = digest;
     }
 
-    static createNew = async (password: string): Promise<HashedUserPassword> => {
+    static readonly createNew = async (password: string): Promise<HashedUserPassword> => {
         return new HashedUserPassword(await argon2.hash(password));
     }
 

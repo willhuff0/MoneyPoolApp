@@ -28,18 +28,27 @@ const userSchema = new Schema({
 export const UserModel = model("User", userSchema);
 export type UserDocument = HydratedDocument<DbUser>;
 
-// const groupSchema = new Schema(
-//   {
+interface DbGroup {
+    group_id: number;
+    name: string;
+    owner: Types.ObjectId;
+    members: Types.ObjectId[];
+    balance: number;
+}
 
-//     group_id: {type : Number, required: true, unique:true},
-//     name: {type: String, required: true},
-//     owner: { type: Types.ObjectId, ref: "User", required: true },
-//     members: [{ type: Types.ObjectId, ref: "User" }],
-//     balance: {type : Number, required: true}
-//   }
-// );
+const groupSchema = new Schema(
+  {
 
-// export const DbGroup = model("Group", groupSchema);
+    group_id: {type : Number, required: true, unique:true},
+    name: {type: String, required: true},
+    owner: { type: Types.ObjectId, ref: "User", required: true },
+    members: [{ type: Types.ObjectId, ref: "User" }],
+    balance: {type : Number, required: true}
+  }
+);
+
+export const GroupModel = model("Group", groupSchema);
+export type GroupDocument = HydratedDocument<DbGroup>;
 
 // const transactionSchema = new Schema(
 //   {

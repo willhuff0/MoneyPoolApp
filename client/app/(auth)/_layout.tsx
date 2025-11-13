@@ -17,3 +17,4 @@ export default function AuthLayout() {
 //If username/email found, go to password page
 //Else sign up
 //If on password page and forgot password, go to password page
+

@@ -4,11 +4,6 @@ import { ScrollView, View, Text, StyleSheet } from "react-native";
 export default function homepage() {
     return (
       <ScrollView contentContainerStyle={styles.container}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.headerText}>Chomp Change</Text>
-        </View>
-  
         {/* Chomp Score */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Chomp Score</Text>

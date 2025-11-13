@@ -1,4 +1,4 @@
-import { Schema, model, Types, HydratedDocument } from "mongoose";
+import { Schema, model, HydratedDocument } from "mongoose";
 
 interface DbUser {
   _id: string;
@@ -44,16 +44,3 @@ const poolSchema = new Schema({
 });
 export const PoolModel = model("Pool", poolSchema);
 export type PoolDocument = HydratedDocument<DbPool>;
-
-// const transactionSchema = new Schema(
-//   {
-//     transaction_id: {type: Number, required: true, unique:true},
-//     group_id: {type: Types.ObjectId, ref: "Group", required:true},
-//     user_id: {type: Types.ObjectId, ref: "User", required:true},
-//     amount: {type: Number, required:true},
-//     description: {type: String, required: true}
-//   },
-//   { timestamps: true }
-// );
-
-// export const DbTransaction = model("Transaction", transactionSchema)

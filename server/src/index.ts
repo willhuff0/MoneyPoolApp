@@ -13,7 +13,8 @@ import { catchAllMiddleware, notFoundMiddleware } from "./middleware/error-middl
   const app = express();
   const port = process.env.PORT || 5000;
 
-  if (!await initDb()) {
+  const dbSession = await initDb();
+  if (dbSession == null) {
     process.exit(1);
   }
 
@@ -21,7 +22,7 @@ import { catchAllMiddleware, notFoundMiddleware } from "./middleware/error-middl
   app.use(express.json());
 
   const sessionAuthority = new TokenAuthority();
-  app.use(getApiRouter(sessionAuthority));
+  app.use(getApiRouter(sessionAuthority, dbSession));
 
   app.use(notFoundMiddleware);
   app.use(catchAllMiddleware);

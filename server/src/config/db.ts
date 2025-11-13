@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const initDb = async (): Promise<boolean> => {
+const initDb = async (): Promise<mongoose.mongo.ClientSession | null> => {
   try {
     const mongoUri = process.env.MONGO_URI;
 
@@ -8,14 +8,16 @@ const initDb = async (): Promise<boolean> => {
       throw new Error('MONGO_URI is not defined in environment variables.');
     }
 
-    await mongoose.connect(mongoUri);
+    const db = await mongoose.connect(mongoUri);
+    const session = await db.startSession();
+
     console.log('MongoDB connected successfully!');
 
-    return true;
+    return session;
   } catch (error) {
     console.error('MongoDB connection failed:', error);
 
-    return false;
+    return null;
   }
 };
 

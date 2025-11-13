@@ -1,7 +1,11 @@
+import { Pool, User } from "./json";
+
 export interface ErrorResponse {
     code?: number,
     message: string,
 }
+
+//#region Auth
 
 export const authDoesUserExistEndpoint = '/auth/doesUserExist';
 export interface AuthDoesUserExistRequest {
@@ -61,3 +65,74 @@ export interface AuthInvalidateTokensRequest {
     userName?: string,
     password: string,
 }
+
+//#endregion
+
+//#region User
+
+export const userGetUserEndpoint = '/user/getUser';
+export interface UserGetUserRequest {
+    userId: string,
+}
+export interface UserGetUserResponse {
+    user: User,
+}
+
+export const userSearchUserEndpoint = '/user/searchUser';
+export interface UserSearchUserRequest {
+    query: string,
+    start?: number,
+    limit?: number,
+}
+export interface UserSearchUserResponse {
+    users: User[],
+}
+
+export const userCreateFriendRequestEndpoint = '/user/createFriendRequest';
+export interface UserCreateFriendRequestRequest {
+    otherUserId: string,
+}
+
+export const userAcceptFriendRequestEndpoint = '/user/acceptFriendRequest';
+export interface UserAcceptFriendRequestRequest {
+    otherUserId: string,
+}
+
+export const userDeleteFriendRequestEndpoint = '/user/deleteFriendRequest';
+export interface UserDeleteFriendRequestRequest {
+    otherUserId: string,
+}
+
+//#endregion
+
+//#region Pool
+
+export const poolGetPool = '/pool/getPool';
+export interface PoolGetPoolRequest {
+    poolId: string,
+}
+export interface PoolGetPoolResponse {
+    pool: Pool,
+}
+
+export const poolCreatePool = '/pool/createPool';
+export interface PoolCreatePoolRequest {
+    name: string,
+}
+export interface PoolCreatePoolResponse {
+    poolId: string,
+}
+
+export const poolAddUser = '/pool/addUser';
+export interface PoolAddUserRequest {
+    poolId: string,
+    userId: string,
+}
+
+export const poolRemoveUser = '/pool/removeUser';
+export interface PoolRemoveUserRequest {
+    poolId: string,
+    userId: string,
+}
+
+//#endregion

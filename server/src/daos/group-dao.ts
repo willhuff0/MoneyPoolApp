@@ -1,35 +1,69 @@
-// import type { ClientSession, FilterQuery, ProjectionType, QueryOptions, UpdateQuery, InferSchemaType } from "mongoose";
-// import { BaseDAO } from "./base-dao";
-// import { DbGroup } from "../models";
+import { GroupModel, GroupDocument } from "../models"
+import { Types } from "mongoose"
 
-// type GroupDoc = InferSchemaType<typeof DbGroup.schema>;
+export class GroupNotUniqueError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = 'GroupNotUniqueError';
+    }
+}
 
-// export class GroupDAO extends BaseDAO<GroupDoc> {
-//   constructor() { super(DbGroup as any); }
+export class GroupDao {
+    public createGroup = async (group_id: number, name: string, owner: Types.ObjectId, balance: number = 0): Promise<void> => {
+        try {
+            const newGroup = new GroupModel({
+                group_id,
+                name,
+                owner,
+                members: [owner],
+                balance
+            });
 
-//   async findByName(name: string, projection?: ProjectionType<any>, options: QueryOptions = {}) {
-//     return this.model.findOne({ name }, projection, options).lean().exec();
-//   }
+            await newGroup.save();
+        } catch (e: any) {
+            if (e.code === 11000) {
+                const field = Object.keys(e.keyValue)[0];
+                throw new GroupNotUniqueError(`Duplicate ${field}: A group with this ${field} already exists.`);
+            } else {
+                throw e;
+            }
+        }
+    }
 
-//   async addMember(groupId: string, userId: string, session?: ClientSession) {
-//     return this.model
-//       .findByIdAndUpdate(groupId, { $addToSet: { members: userId } }, { session: session ?? undefined, new: true })
-//       .lean()
-//       .exec();
-//   }
+    public getGroupById = async (groupId: string): Promise<GroupDocument | null> => {
+        return await GroupModel.findById(new Types.ObjectId(groupId));
+    }
 
-//   async removeMember(groupId: string, userId: string, session?: ClientSession) {
-//     return this.model
-//       .findByIdAndUpdate(groupId, { $pull: { members: userId } }, { session: session ?? undefined, new: true })
-//       .lean()
-//       .exec();
-//   }
+    public findByName = async (name: string): Promise<GroupDocument | null> => {
+        return await GroupModel.findOne({ name });
+    }
 
-//   async updateGroup(filter: FilterQuery<any>, update: UpdateQuery<any>, options: QueryOptions = {}) {
-//     return this.model.findOneAndUpdate(filter, update, { ...options, new: true }).lean().exec();
-//   }
+    public addMember = async (groupId: string, userId: string): Promise<GroupDocument | null> => {
+        return await GroupModel.findByIdAndUpdate(
+            new Types.ObjectId(groupId),
+            { $addToSet: { members: new Types.ObjectId(userId) } },
+            { new: true }
+        );
+    }
 
-//   async deleteGroup(filter: FilterQuery<any>, session?: ClientSession) {
-//     return this.model.deleteOne(filter, { session: session ?? undefined }).exec();
-//   }
-// }
+    public removeMember = async (groupId: string, userId: string): Promise<GroupDocument | null> => {
+        return await GroupModel.findByIdAndUpdate(
+            new Types.ObjectId(groupId),
+            { $pull: { members: new Types.ObjectId(userId) } },
+            { new: true }
+        );
+    }
+
+    public updateGroup = async (groupId: string, updates: any): Promise<GroupDocument | null> => {
+        return await GroupModel.findByIdAndUpdate(
+            new Types.ObjectId(groupId),
+            updates,
+            { new: true }
+        );
+    }
+
+    public deleteGroup = async (groupId: string): Promise<boolean> => {
+        const result = await GroupModel.findByIdAndDelete(new Types.ObjectId(groupId));
+        return !!result;
+    }
+}

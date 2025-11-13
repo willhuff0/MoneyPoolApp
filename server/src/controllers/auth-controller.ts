@@ -152,7 +152,7 @@ export class AuthController {
             return;
         }
 
-        if (!new HashedUserPassword(dbUser.passwordDigest).doesPasswordMatch(body.password)) {
+        if (!await new HashedUserPassword(dbUser.passwordDigest).doesPasswordMatch(body.password)) {
             res.status(401).json({ code: 2, message: "userName or email and password does not match" } as Protocol.ErrorResponse);
             return;
         }
@@ -255,7 +255,7 @@ export class AuthController {
             return;
         }
 
-        if (!new HashedUserPassword(dbUser.passwordDigest).doesPasswordMatch(body.password)) {
+        if (!await new HashedUserPassword(dbUser.passwordDigest).doesPasswordMatch(body.password)) {
             res.status(401).json({ code: 2, message: "userName or email and password does not match" } as Protocol.ErrorResponse);
             return;
         }

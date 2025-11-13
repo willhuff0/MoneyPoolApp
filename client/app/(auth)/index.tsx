@@ -48,7 +48,7 @@ export default function IdentifierScreen() {
 
           <Text style={{ marginTop: 6 }}>Email or Username</Text>
           <TextInput
-            placeholder="you@ufl.edu or devina_t"
+            placeholder="you@ufl.edu or your_username"
             autoCapitalize="none"
             autoCorrect={false}
             keyboardType="email-address"

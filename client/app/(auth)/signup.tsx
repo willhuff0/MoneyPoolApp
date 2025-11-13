@@ -45,7 +45,7 @@ export default function SignupScreen() {
         // Token stored automatically by api.ts if backend returns it
         Alert.alert("Success", "Account created!");
         // Navigate to your main app screen (tabs/root)
-        router.replace("/");
+        router.replace("/index");
       } else {
       Alert.alert("Signup failed");
       }
@@ -62,7 +62,7 @@ export default function SignupScreen() {
 
           <Text>Display Name</Text>
           <TextInput
-            placeholder="Devina Tikkoo"
+            placeholder="Your Name"
             autoCapitalize="words"
             value={displayName}
             onChangeText={setDisplayName}
@@ -71,7 +71,7 @@ export default function SignupScreen() {
 
           <Text>Username</Text>
           <TextInput
-            placeholder="devina_t"
+            placeholder="your_username"
             autoCapitalize="none"
             value={userName}
             onChangeText={setUserName}

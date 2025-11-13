@@ -107,7 +107,7 @@ export interface UserDeleteFriendRequestRequest {
 
 //#region Pool
 
-export const poolGetPool = '/pool/getPool';
+export const poolGetPoolEndpoint = '/pool/getPool';
 export interface PoolGetPoolRequest {
     poolId: string,
 }
@@ -115,7 +115,7 @@ export interface PoolGetPoolResponse {
     pool: Pool,
 }
 
-export const poolCreatePool = '/pool/createPool';
+export const poolCreatePoolEndpoint = '/pool/createPool';
 export interface PoolCreatePoolRequest {
     name: string,
 }
@@ -123,14 +123,19 @@ export interface PoolCreatePoolResponse {
     poolId: string,
 }
 
-export const poolAddUser = '/pool/addUser';
-export interface PoolAddUserRequest {
+export const poolDeletePoolEndpoint = '/pool/deletePool';
+export interface PoolDeletePoolRequest {
+    poolId: string,
+}
+
+export const poolAddMemberEndpoint = '/pool/addMember';
+export interface PoolAddMemberRequest {
     poolId: string,
     userId: string,
 }
 
-export const poolRemoveUser = '/pool/removeUser';
-export interface PoolRemoveUserRequest {
+export const poolRemoveMemberEndpoint = '/pool/removeMember';
+export interface PoolRemoveMemberRequest {
     poolId: string,
     userId: string,
 }

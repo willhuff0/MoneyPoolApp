@@ -21,7 +21,7 @@ export class UserController {
         
         res.status(200).json({
             user: {
-                userId: user.id,
+                userId: user._id,
                 userName: user.userName,
                 displayName: user.displayName,
                 chompScore: user.chompScore,
@@ -41,7 +41,7 @@ export class UserController {
         res.status(200).json({
             users: [
                 {
-                    userId: user.id,
+                    userId: user._id,
                     userName: user.userName,
                     displayName: user.displayName,
                     chompScore: user.chompScore,

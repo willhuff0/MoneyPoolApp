@@ -48,7 +48,8 @@ export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
                 if (response.status != 200) return false;
 
                 return response.data.userExists;
-            } catch (_) {
+            } catch (error) {
+                console.log(error);
                 return false;
             }
         },
@@ -70,12 +71,13 @@ export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
                     chompScore: user.chompScore,
                 });
                 return true;
-            } catch (_) {
+            } catch (error) {
+                console.log(error);
                 return false;
             }
         },
         signUp: async (request) => {
-                try {
+            try {
                 const response = await axios.post<AuthCreateUserResponse>(`${apiClient.defaults.baseURL}${authCreateUserEndpoint}`, request);
                 if (response.status != 200) return false;
 
@@ -92,7 +94,8 @@ export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
                     chompScore: user.chompScore,
                 });
                 return true;
-            } catch (_) {
+            } catch (error) {
+                console.log(error);
                 return false;
             }
         },
@@ -108,7 +111,8 @@ export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
                 setActiveUser(null);
 
                 return response.status == 200;
-            } catch (_) {
+            } catch (error) {
+                console.log(error);
                 return false;
             }
         },

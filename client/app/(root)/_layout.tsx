@@ -43,17 +43,24 @@ export default function RootLayout() {
           }}
         />
         <Tabs.Screen
-          name="explore"
+          name="pools"
           options={{
-            title: "Explore",
-            tabBarIcon: () => <Text>🔍</Text>,
+            title: "Pools",
+            tabBarIcon: () => <Text>💰</Text>,
           }}
         />
         <Tabs.Screen
           name="profile"
           options={{
             title: "Profile",
-            tabBarIcon: () => <Text>👤</Text>,
+            tabBarIcon: () => <Text>🐊</Text>,
+          }}
+        />
+        <Tabs.Screen
+          name = "friends"
+          options={{
+            title: "Friends",
+            tabBarIcon: () => <Text>👥</Text>,
           }}
         />
       </Tabs>

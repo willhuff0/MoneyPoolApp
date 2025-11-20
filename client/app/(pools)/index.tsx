@@ -4,12 +4,6 @@ import { useRouter } from "expo-router";
 import PoolsBackground from "../../components/PoolsBackground";
 import AuthCard from "../../components/AuthCard";
 
-const samplePools = [
-  { id: "1", name: "Weekend Trip", balance: 240.5 },
-  { id: "2", name: "House Gifts", balance: 1200 },
-  { id: "3", name: "Office Snacks", balance: 45.25 },
-];
-
 export default function PoolsIndex() {
   const router = useRouter();
 
@@ -19,7 +13,7 @@ export default function PoolsIndex() {
         <AuthCard>
           <View style={styles.headerRow}>
             <Text style={styles.title}>My Pools</Text>
-            <Pressable style={styles.createButton} onPress={() => router.push("/pools/create")}>
+            <Pressable style={styles.createButton} onPress={() => router.push("...")}>
               <Text style={styles.createButtonText}>Create Pool</Text>
             </Pressable>
           </View>

@@ -7,7 +7,7 @@ export default function RootLayout() {
   useEffect(() => {
     checkAuthStatus();
   }, []);
-
+//hi
   const checkAuthStatus = async () => {
     try {
       // TESTING: Skip auth check - always show root layout

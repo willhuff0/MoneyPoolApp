@@ -1,4 +1,4 @@
-import { SessionToken } from "@shared/json";
+import { SessionToken } from "@money-pool-app/shared";
 
 declare global {
     namespace Express {

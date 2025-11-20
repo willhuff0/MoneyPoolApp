@@ -1,8 +1,12 @@
 export interface SessionToken {
     userId: string,
     timestamp: string,
-    ip: string,
     claims: string[],
+}
+
+export interface RefreshToken {
+    userId: string,
+    timestamp: string,
 }
 
 export interface User {
@@ -13,7 +17,7 @@ export interface User {
 }
 
 export interface Pool {
-    groupId: string,
+    poolId: string,
     displayName: string,
     ownerUserId: string,
     members: string[],
@@ -22,7 +26,7 @@ export interface Pool {
 
 export interface Transaction {
     transactionId: string,
-    groupId: string,
+    poolId: string,
     userId: string,
     timestamp: string,
     amount: number,

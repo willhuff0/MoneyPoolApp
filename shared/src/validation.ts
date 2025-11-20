@@ -1,8 +1,10 @@
 import * as EmailValidator from 'email-validator';
 
-const displayNamePattern = new RegExp("/^\S.{0,62}\S$/");
-const userNamePattern = new RegExp("/^[0-9A-Za-z]{6,16}$/");
-const passwordPattern = new RegExp("/^.{8,32}$/");
+const displayNamePattern = /^\S.{0,62}\S$/;
+const userNamePattern = /^[0-9A-Za-z]{6,16}$/;
+const passwordPattern = /^.{8,32}$/;
+
+const poolNamePattern = /^\S.{0,62}\S$/;
 
 export const validateDisplayName = (displayName: string): boolean => {
     if (typeof displayName !== "string") return false;
@@ -22,4 +24,9 @@ export const validateEmail = (email: string): boolean => {
 export const validatePassword = (password: string): boolean => {
     if (typeof password !== "string") return false;
     return passwordPattern.test(password);
+}
+
+export const validatePoolName = (name: string): boolean => {
+    if (typeof name !== "string") return false;
+    return poolNamePattern.test(name);
 }

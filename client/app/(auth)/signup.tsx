@@ -4,9 +4,12 @@ import { useState } from "react";
 import { Alert, Pressable, Text, TextInput, View } from "react-native";
 import AuthBg from "../../components/AuthBg";
 import AuthCard from "../../components/AuthCard";
-import { register } from "../../lib/api";
+import { useApi } from "@/api/api-provider";
+import { validateDisplayName, validateEmail, validatePassword, validateUserName } from "@money-pool-app/shared";
 
 export default function SignupScreen() {
+  const api = useApi();
+
   const [displayName, setDisplayName] = useState("");
   const [userName, setUserName] = useState("");
   const [email, setEmail] = useState("");
@@ -19,15 +22,33 @@ export default function SignupScreen() {
       return;
     }
 
+    if (!validateDisplayName(displayName.trim())) {
+      Alert.alert("Invalid info", "Display Name is invalid.");
+      return;
+    }
+    if (!validateUserName(userName.trim())) {
+      Alert.alert("Invalid info", "Username is invalid.");
+      return;
+    }
+    if (!validateEmail(email.trim())) {
+      Alert.alert("Invalid info", "Email is invalid.");
+      return;
+    }
+    if (!validatePassword(password.trim())) {
+      Alert.alert("Invalid info", "Password is invalid.");
+      return;
+    }
+
     try {
       setBusy(true);
-      await register({ displayName: displayName.trim(), userName: userName.trim(), email: email.trim(), password });
-      // Token stored automatically by api.ts if backend returns it
-      Alert.alert("Success", "Account created!");
-      // Navigate to your main app screen (tabs/root)
-      router.replace("/");
-    } catch (e: any) {
-      Alert.alert("Signup failed", e?.message ?? "Unknown error");
+      if (await api.signUp({ displayName: displayName.trim(), userName: userName.trim(), email: email.trim(), password })) {
+        // Token stored automatically by api.ts if backend returns it
+        Alert.alert("Success", "Account created!");
+        // Navigate to your main app screen (tabs/root)
+        router.replace("/index");
+      } else {
+      Alert.alert("Signup failed");
+      }
     } finally {
       setBusy(false);
     }
@@ -41,7 +62,7 @@ export default function SignupScreen() {
 
           <Text>Display Name</Text>
           <TextInput
-            placeholder="Devina Tikkoo"
+            placeholder="Your Name"
             autoCapitalize="words"
             value={displayName}
             onChangeText={setDisplayName}
@@ -50,7 +71,7 @@ export default function SignupScreen() {
 
           <Text>Username</Text>
           <TextInput
-            placeholder="devina_t"
+            placeholder="your_username"
             autoCapitalize="none"
             value={userName}
             onChangeText={setUserName}

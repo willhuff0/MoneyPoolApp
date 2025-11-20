@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { Alert, Pressable, Text, TextInput, View } from "react-native";
 import AuthBg from "../../components/AuthBg";
 import AuthCard from "../../components/AuthCard";
-import { requestPasswordReset } from "../../lib/api";
 import { isEmail } from "../../utils/ident";
 
 export default function ForgotPasswordScreen() {
@@ -25,17 +24,17 @@ export default function ForgotPasswordScreen() {
       return;
     }
     try {
-      await requestPasswordReset({ email: trimmed });
+      // await requestPasswordReset({ email: trimmed });
       Alert.alert(
         "Check your inbox",
-        "If an account exists for that email, you’ll receive reset instructions.",
+        "If an account exists for that email, you'll receive reset instructions.",
         [{ text: "OK", onPress: () => router.back() }]
       );
     } catch (e: any) {
       //Instructions message
       Alert.alert(
         "Check your inbox",
-        "If an account exists for that email, you’ll receive reset instructions."
+        "If an account exists for that email, you'll receive reset instructions."
       );
     }
   };

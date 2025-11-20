@@ -1,14 +1,26 @@
 import { Router } from "express";
-import authRoutes from "./auth.js";
-import userRoutes from "./users.js";
-import groupRoutes from "./groups.js";
-import transactionRoutes from "./transactions.js";
+import { mongo } from "mongoose";
 
-const api = Router();
+import { TokenAuthority } from "../security/token-authority";
+import { AuthMiddleware } from "../middleware/auth-middleware";
 
-api.use("/auth", authRoutes);
-api.use("/users", userRoutes);
-api.use("/groups", groupRoutes);
-api.use("/", transactionRoutes); 
+import { UserDao } from "../daos/user-dao";
+import { PoolDao } from "../daos/pool-dao";
+import { getAuthRouter } from "./auth";
+import { getUserRouter } from "./user";
+import { getPoolRouter } from "./pool";
 
-export default api;
+export const getApiRouter = (sessionAuthority: TokenAuthority, dbSession: mongo.ClientSession): Router => {
+    const api = Router();
+
+    const userDao = new UserDao(dbSession);
+    const poolDao = new PoolDao(dbSession);
+
+    api.use("/auth", getAuthRouter(sessionAuthority, userDao));
+
+    const authMiddleware = new AuthMiddleware(sessionAuthority);
+    api.use("/user", authMiddleware.ensureAuthenticated, getUserRouter(userDao));
+    api.use("/pool", authMiddleware.ensureAuthenticated, getPoolRouter(poolDao));
+
+    return api;
+}

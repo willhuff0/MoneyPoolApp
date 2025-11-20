@@ -1,11 +1,11 @@
 import type { Request, Response, NextFunction } from "express";
 
-import { SessionAuthority } from 'src/security/session-authority';
+import { TokenAuthority } from '../security/token-authority';
 
-class AuthMiddleware {
-  sessionAuthority: SessionAuthority;
+export class AuthMiddleware {
+  sessionAuthority: TokenAuthority;
 
-  constructor(sessionAuthority: SessionAuthority) {
+  constructor(sessionAuthority: TokenAuthority) {
     this.sessionAuthority = sessionAuthority;
   }
 
@@ -22,7 +22,7 @@ class AuthMiddleware {
         res.status(401).json({ message: "Session token is required" });
         return;
       }
-      const sessionToken = this.sessionAuthority.verifyAndDecodeToken(encodedSessionToken);
+      const sessionToken = this.sessionAuthority.verifyAndDecodeSessionToken(encodedSessionToken);
       if (sessionToken == null) {
         res.status(401).json({ message: "Session token is invalid or expired" });
         return;

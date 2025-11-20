@@ -1,4 +1,4 @@
-import { Schema, model, Types, HydratedDocument } from "mongoose";
+import { Schema, model, HydratedDocument } from "mongoose";
 
 interface DbUser {
   _id: string;
@@ -28,37 +28,19 @@ const userSchema = new Schema({
 export const UserModel = model("User", userSchema);
 export type UserDocument = HydratedDocument<DbUser>;
 
-interface DbGroup {
-    group_id: number;
+interface DbPool {
+    _id: string;
     name: string;
-    owner: Types.ObjectId;
-    members: Types.ObjectId[];
+    owner: string;
+    members: string[];
     balance: number;
 }
-
-const groupSchema = new Schema(
-  {
-
-    group_id: {type : Number, required: true, unique:true},
-    name: {type: String, required: true},
-    owner: { type: Types.ObjectId, ref: "User", required: true },
-    members: [{ type: Types.ObjectId, ref: "User" }],
-    balance: {type : Number, required: true}
-  }
-);
-
-export const GroupModel = model("Group", groupSchema);
-export type GroupDocument = HydratedDocument<DbGroup>;
-
-// const transactionSchema = new Schema(
-//   {
-//     transaction_id: {type: Number, required: true, unique:true},
-//     group_id: {type: Types.ObjectId, ref: "Group", required:true},
-//     user_id: {type: Types.ObjectId, ref: "User", required:true},
-//     amount: {type: Number, required:true},
-//     description: {type: String, required: true}
-//   },
-//   { timestamps: true }
-// );
-
-// export const DbTransaction = model("Transaction", transactionSchema)
+const poolSchema = new Schema({
+  _id: { type: String, required: true },
+  name: { type: String, required: true },
+  owner: { type: String, required: true },
+  members: [String],
+  balance: { type : Number, required: true },
+});
+export const PoolModel = model("Pool", poolSchema);
+export type PoolDocument = HydratedDocument<DbPool>;

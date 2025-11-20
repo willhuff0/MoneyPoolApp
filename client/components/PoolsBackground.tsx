@@ -8,7 +8,7 @@ export default function PoolsBackground({
   return (
     <View style={{ flex: 1, backgroundColor: "#0A2463" }}>
       <View style={{ paddingTop: Platform.select({ web: 40, default: 20 }), paddingBottom: 16, alignItems: "center" }}>
-        <Text style={{ fontSize: 28, fontWeight: "700", color: "#ba7f09ff" }}>{title}</Text>
+        <Text style={{ fontSize: 28, fontWeight: "700", color: "#c3c1bdff" }}>{title}</Text>
       </View>
       <View style={{ flex: 1, alignItems: "center", justifyContent: "flex-start", padding: 24 }}>
         <View style={{ width: "100%", maxWidth: 840 }}>{children}</View>

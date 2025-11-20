@@ -18,7 +18,7 @@ export class AuthController {
         this.sessionAuthority = sessionAuthority;
     }
 
-    public doesUserExist = async (req: Request, res: Response): Promise<void> => {
+    public readonly doesUserExist = async (req: Request, res: Response): Promise<void> => {
         const body: Protocol.AuthDoesUserExistRequest = req.body;
 
         if (body.userName != undefined && body.email != undefined) {
@@ -51,7 +51,7 @@ export class AuthController {
         } as Protocol.AuthDoesUserExistResponse);
     }
     
-    public createUser = async (req: Request, res: Response): Promise<void> => {
+    public readonly createUser = async (req: Request, res: Response): Promise<void> => {
         const body: Protocol.AuthCreateUserRequest = req.body ?? {};
 
         if (!validateDisplayName(body.displayName)) {
@@ -115,7 +115,7 @@ export class AuthController {
         } as Protocol.AuthCreateUserResponse);
     }
 
-    public signIn = async (req: Request, res: Response): Promise<void> => {
+    public readonly signIn = async (req: Request, res: Response): Promise<void> => {
         const body: Protocol.AuthSignInRequest = req.body;
 
         if (body.userName != undefined && body.email != undefined) {
@@ -180,7 +180,7 @@ export class AuthController {
         } as Protocol.AuthSignInResponse);
     }
 
-    public refresh = async (req: Request, res: Response): Promise<void> => {
+    public readonly refresh = async (req: Request, res: Response): Promise<void> => {
         const body: Protocol.AuthRefreshRequest = req.body;
 
         const refreshToken = this.sessionAuthority.verifyAndDecodeRefreshToken(body.refreshToken);
@@ -218,7 +218,7 @@ export class AuthController {
         } as Protocol.AuthRefreshResponse);
     }
 
-    public invalidateTokens = async (req: Request, res: Response): Promise<void> => {
+    public readonly invalidateTokens = async (req: Request, res: Response): Promise<void> => {
         const body: Protocol.AuthSignInRequest = req.body;
 
         if (body.userName != undefined && body.email != undefined) {

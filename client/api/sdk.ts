@@ -19,6 +19,9 @@ export const createApiSdk = (client: AxiosInstance) => {
             addMember: Pool.addMember(client),
             removeMember: Pool.removeMember(client),
         },
+        transaction: {
+            
+        },
     };
 }
 

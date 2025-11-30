@@ -6,12 +6,16 @@ import { useSdk } from "@/api/api-provider";
 export default function PoolsIndex() {
   const router = useRouter();
   const sdk = useSdk();
-  const [pools, setPools] = useState<Array<{ id: string; name: string; balance: number }>>([]);
+  // Mock pool data for testing
+  const [pools, setPools] = useState<Array<{ id: string; name: string; balance: number }>>([
+    { id: "pool-1", name: "Weekend Trip", balance: 123.45 },
+    { id: "pool-2", name: "Office Lunch Fund", balance: 87.50 },
+  ]);
   const [loading, setLoading] = useState(false);
 
   const onCreatePool = () => {
-    // Navigate to create pool page
-    // router.push("/(pools)/create");
+    //Go to create pool page
+    router.push("/(root)/create");
   };
 
   return (
@@ -36,8 +40,8 @@ export default function PoolsIndex() {
                 key={p.id}
                 style={styles.poolItem}
                 onPress={() => {
-                  // TODO: Navigate to pool details page when created
-                  // router.push(`/(pools)/${p.id}`);
+                  //Placeholder for navigating to specific pool page
+                  router.push(`/(root)/specificpool?poolId=${p.id}`);
                 }}
               >
                 <View>
@@ -70,7 +74,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   createButton: {
-    backgroundColor: "#061635",
+    backgroundColor: "#1428A0",
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 8,

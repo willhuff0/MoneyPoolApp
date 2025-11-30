@@ -1,16 +1,36 @@
 import React, { useState } from "react";
 import { ScrollView, View, Text, StyleSheet, TextInput, Pressable, Alert } from "react-native";
 import { useRouter } from "expo-router";
+import { useSdk } from "@/api/api-provider";
 
 export default function CreatePool() {
   const router = useRouter();
+  const sdk = useSdk();
   const [name, setName] = useState("");
-  const [initialAmount, setInitialAmount] = useState("");
+  const [creating, setCreating] = useState(false);
 
-  function onCreate() {
-    // Placeholder: Replace with API call to create pool
-    Alert.alert("Create Pool", `Pool '${name}' created (mock)`);
-    router.replace("/index");
+  async function onCreate() {
+    const trimmedName = name.trim();
+    if (!trimmedName) {
+      Alert.alert("Error", "Please enter a pool name");
+      return;
+    }
+
+    setCreating(true);
+    try {
+      const poolId = await sdk.pool.createPool(trimmedName);
+      if (poolId) {
+        Alert.alert("Success", `Pool '${trimmedName}' created!`);
+        router.replace("/(root)/poolslist");
+      } else {
+        Alert.alert("Error", "Failed to create pool");
+      }
+    } catch (e) {
+      console.error("Error creating pool:", e);
+      Alert.alert("Error", "Failed to create pool");
+    } finally {
+      setCreating(false);
+    }
   }
 
   return (
@@ -22,11 +42,16 @@ export default function CreatePool() {
         <TextInput style={styles.input} value={name} onChangeText={setName} placeholder="e.g. Weekend Trip" />
 
         <Text style={[styles.label, { marginTop: 12 }]}>Initial amount</Text>
-        <TextInput style={styles.input} value={initialAmount} onChangeText={setInitialAmount} placeholder="0.00" keyboardType="numeric" />
+        <Text style={styles.amountText}>$0.00</Text>
 
-        <Pressable style={styles.button} onPress={onCreate}>
-          <Text style={styles.buttonText}>Create</Text>
-        </Pressable>
+        <View style={styles.buttonRow}>
+          <Pressable style={[styles.button, creating && { backgroundColor: "#94a3b8" }]} onPress={onCreate} disabled={creating}>
+            <Text style={styles.buttonText}>{creating ? "Creating Pool..." : "Create"}</Text>
+          </Pressable>
+          <Pressable style={styles.cancelButton} onPress={() => router.back()} disabled={creating}>
+            <Text style={styles.cancelButtonText}>Cancel</Text>
+          </Pressable>
+        </View>
       </View>
     </ScrollView>
   );
@@ -62,8 +87,29 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: "#fff",
   },
-  button: {
+  amountText: {
+    fontSize: 16,
+    color: "#374151",
+    marginBottom: 4,
+  },
+  buttonRow: {
     marginTop: 16,
+    flexDirection: "row",
+    gap: 12,
+  },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: "#e5e7eb",
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  cancelButtonText: {
+    color: "#374151",
+    fontWeight: "700",
+  },
+  button: {
+    flex: 1,
     backgroundColor: "#1428A0",
     paddingVertical: 12,
     borderRadius: 10,

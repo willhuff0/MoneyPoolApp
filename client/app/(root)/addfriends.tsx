@@ -7,13 +7,13 @@ export default function AddFriendsScreen() {
   const sdk = useSdk();
   const [query, setQuery] = useState("");
   const [searching, setSearching] = useState(false);
-  const [found, setFound] = useState<{ userId: string; userName: string; displayName: string } | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   
-  //search user by username using onSearch API 
+  //search user by username and send friend request
   async function onSearch() {
     setError(null);
-    setFound(null);
+    setSuccessMessage(null);
 
     const trimmed = query.trim();
     if (!trimmed) {
@@ -25,41 +25,31 @@ export default function AddFriendsScreen() {
     try {
       const user = await sdk.user.searchUser(trimmed);
       if (user) {
-        setFound({ userId: user.userId, userName: user.userName, displayName: user.displayName });
+        // User found, automatically send friend request 
+        const success = await sdk.user.createFriendRequest(user.userId);
+        if (success) {
+          setSuccessMessage(`Friend request sent to ${user.displayName || user.userName}!`);
+          setQuery("");
+        } else {
+          setError("Failed to send friend request");
+        }
       } else {
-        setError("no user found with this username");
+        //User not found; request will not send
+        setError("Username does not exist. Please try again.");
       }
     } catch (e) {
       console.error("Search error:", e);
-      setError("Error searching for user");
+      setError("Username does not exist. Please try again.");
     } finally {
       setSearching(false);
-    }
-  }
-
-  //Send friend request using create Friend request API 
-  async function onAddFriend() {
-    if (!found) return;
-
-    try {
-      const success = await sdk.user.createFriendRequest(found.userId);
-      if (success) {
-        Alert.alert("Friend request sent", `Friend request sent to ${found.displayName}`);
-        setFound(null);
-        setQuery("");
-      } else {
-        Alert.alert("Error", "Failed to send friend request");
-      }
-    } catch (e) {
-      console.error("Friend request error:", e);
-      Alert.alert("Error", "Failed to send friend request");
     }
   }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Find friends by username</Text>
+        <Text style={styles.sectionTitle}>Find Friends</Text>
+        <Text style={styles.subtitleText}>Enter a valid username to send a friend request.</Text>
 
         <TextInput
           placeholder="username"
@@ -76,18 +66,7 @@ export default function AddFriendsScreen() {
         </Pressable>
 
         {error ? <Text style={{ color: "#ef4444", marginTop: 12 }}>{error}</Text> : null}
-
-        {found ? (
-          <View style={styles.result}>
-            <View>
-              <Text style={{ fontWeight: "700" }}>{found.displayName ?? found.userName}</Text>
-              <Text style={{ color: "#6b7280" }}>@{found.userName}</Text>
-            </View>
-            <Pressable style={styles.addButton} onPress={onAddFriend}>
-              <Text style={{ color: "#fff", fontWeight: "700" }}>Add</Text>
-            </Pressable>
-          </View>
-        ) : null}
+        {successMessage ? <Text style={{ color: "#10b981", marginTop: 12, fontWeight: "600" }}>{successMessage}</Text> : null}
       </View>
     </ScrollView>
   );
@@ -110,6 +89,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 16,
+  },
+  subtitleText: {
+    fontSize: 14,
+    color: "#6b7280",
+    marginBottom: 12,
   },
   input: {
     borderWidth: 1,

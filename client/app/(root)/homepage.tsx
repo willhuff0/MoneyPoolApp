@@ -1,11 +1,13 @@
 import React from "react";
-import { ScrollView, View, Text, StyleSheet } from "react-native";
+import { ScrollView, View, Text, StyleSheet, Pressable, ViewStyle, TextStyle } from "react-native";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import { useApi } from "@/api/api-provider";
+import { useRouter } from "expo-router";
 
 export default function Homepage() {
     const { activeUser } = useApi();
+    const router = useRouter();
     const chompScore = activeUser?.chompScore || 0;
     let chompScoreText = "";
     let advice = "";
@@ -54,7 +56,12 @@ export default function Homepage() {
         </View>
         {/* Friend Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Friends</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Friends</Text>
+            <Pressable style={styles.addButton} onPress={() => router.push("/(root)/addfriends")}>
+              <Text style={styles.addButtonText}>Add Friend</Text>
+            </Pressable>
+          </View>
           <View style={styles.placeholder}>
             <Text style={styles.placeholderText}>[Press Add Friends to get started!]</Text>
           </View>
@@ -91,6 +98,23 @@ export default function Homepage() {
       fontSize: 18,
       fontWeight: "bold",
       marginBottom: 8,
+    },
+    sectionHeader: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 8,
+    },
+    addButton: {
+      backgroundColor: "#1428A0",
+      paddingVertical: 6,
+      paddingHorizontal: 12,
+      borderRadius: 8,
+    },
+    addButtonText: {
+      color: "#fff",
+      fontWeight: "600",
+      fontSize: 14,
     },
     placeholder: {
       borderWidth: 1,

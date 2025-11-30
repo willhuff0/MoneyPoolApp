@@ -6,6 +6,8 @@ const passwordPattern = /^.{8,32}$/;
 
 const poolNamePattern = /^\S.{0,62}\S$/;
 
+const transactionDescriptionPattern = /^\S.{0,126}\S$/;
+
 export const validateDisplayName = (displayName: string): boolean => {
     if (typeof displayName !== "string") return false;
     return displayNamePattern.test(displayName);
@@ -29,4 +31,9 @@ export const validatePassword = (password: string): boolean => {
 export const validatePoolName = (name: string): boolean => {
     if (typeof name !== "string") return false;
     return poolNamePattern.test(name);
+}
+
+export const validateTransactionDescription = (description: string): boolean => {
+    if (typeof description !== "string") return false;
+    return transactionDescriptionPattern.test(description);
 }

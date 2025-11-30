@@ -2,6 +2,7 @@ import { AxiosInstance } from "axios";
 
 import * as User from './endpoints/user';
 import * as Pool from './endpoints/pool';
+import * as Transaction from './endpoints/transaction';
 
 export const createApiSdk = (client: AxiosInstance) => {
     return {
@@ -18,6 +19,11 @@ export const createApiSdk = (client: AxiosInstance) => {
             deletePool: Pool.deletePool(client),
             addMember: Pool.addMember(client),
             removeMember: Pool.removeMember(client),
+        },
+        transaction: {
+            getTransactions: Transaction.getTransactions(client),
+            createTransaction: Transaction.createTransaction(client),
+            deleteTransaction: Transaction.deleteTransaction(client),
         },
     };
 }

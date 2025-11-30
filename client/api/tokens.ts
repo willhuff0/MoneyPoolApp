@@ -52,10 +52,13 @@ export const loadTokens = async (): Promise<Partial<Tokens>> => {
        getItemAsync(SESSION_KEY),
        getItemAsync(REFRESH_KEY), 
     ]);
-    return memory = {
+    memory = {
         sessionToken: sessionToken ?? undefined,
         refreshToken: refreshToken ?? undefined,
     };
+
+    console.log(`Got Tokens: ${JSON.stringify(memory)}`);
+    return memory;
 }
 
 export const saveTokens = async (tokens: Tokens): Promise<void> => {

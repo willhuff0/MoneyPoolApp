@@ -13,6 +13,28 @@ export class UserController {
     public readonly getUser = async (req: Request, res: Response): Promise<void> => {
         const body: Protocol.UserGetUserRequest = req.body;
 
+        if (body?.userId == undefined) {
+            // Get self user
+            const sessionToken = req.sessionToken!;
+
+            const user = await this.userDao.getUserById(sessionToken.userId);
+            if (user == null) {
+                res.status(404).json({ message: "User not found" } as Protocol.ErrorResponse);
+                return;
+            }
+            
+            res.status(200).json({
+                user: {
+                    userId: user._id,
+                    email: user.email,
+                    userName: user.userName,
+                    displayName: user.displayName,
+                    chompScore: user.chompScore,
+                }
+            } as Protocol.UserGetSelfUserResponse);
+            return;
+        }
+
         const user = await this.userDao.getUserById(body.userId);
         if (user == null) {
             res.status(404).json({ message: "User not found" } as Protocol.ErrorResponse);

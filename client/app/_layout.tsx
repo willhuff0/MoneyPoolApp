@@ -1,45 +1,30 @@
-import { Stack, router } from "expo-router";
-import { useEffect, useState } from "react";
-import { loadTokens } from "@/api/tokens";
+import { ApiProvider, useApi } from "@/api/api-provider";
+import { Stack, Redirect } from "expo-router";
 
-export default function RootLayout() {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+function LoggedInSwitcher() {
+  const api = useApi();
 
-  useEffect(() => {
-    checkAuthStatus();
-  }, []);
-
-  const checkAuthStatus = async () => {
-    try {
-      // Load tokens from secure storage and consider user logged in if a session token exists.
-      const tokens = await loadTokens();
-      setIsLoggedIn(!!tokens.sessionToken);
-    } catch (error) {
-      console.error("Error checking auth:", error);
-      setIsLoggedIn(false);
-    }
-  };
-
-  //Check if logged in and redirect to home page if so 
-  useEffect(() => {
-    if (isLoggedIn === null) return;
-    if (isLoggedIn) {
-      router.replace("/(root)/homepage");
-    } else {
-      router.replace("/(auth)");
-    }
-  }, [isLoggedIn]);
-
-  if (isLoggedIn === null) {
-    return null;
+  if (!api.ready) {
+    return null; // Or a loading screen
   }
 
+  if (api.activeUser == null) {
+    return <Redirect href="/(auth)" />;
+  } else {
+    return <Redirect href="/(root)/homepage" />;
+  }
+}
+
+export default function AppLayout() {
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(auth)" />
-      <Stack.Screen name="(root)" />
-    </Stack>
-  );
+    <ApiProvider>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(auth)" />
+        <Stack.Screen name="(root)" />
+      </Stack>
+      <LoggedInSwitcher />
+    </ApiProvider>
+  )
 }
 
 //Flow: 

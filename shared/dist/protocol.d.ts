@@ -59,10 +59,19 @@ export interface AuthInvalidateTokensRequest {
 }
 export declare const userGetUserEndpoint = "/user/getUser";
 export interface UserGetUserRequest {
-    userId: string;
+    userId?: string;
 }
 export interface UserGetUserResponse {
     user: User;
+}
+export interface UserGetSelfUserResponse {
+    user: {
+        userId: string;
+        email: string;
+        userName: string;
+        displayName: string;
+        chompScore: number;
+    };
 }
 export declare const userSearchUserEndpoint = "/user/searchUser";
 export interface UserSearchUserRequest {

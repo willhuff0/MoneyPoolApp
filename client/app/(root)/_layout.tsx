@@ -24,7 +24,7 @@ export default function RootLayout() {
         </Text>
       </View>
 
-      {/* --- Bottom Tabs --- */}
+      {/* --- Bottom Tabs (3) --- */}
       <Tabs
         screenOptions={{
           headerShown: false, // We already have a custom header
@@ -44,24 +44,17 @@ export default function RootLayout() {
           }}
         />
         <Tabs.Screen
-          name="pools"
+          name="poolslist"
           options={{
             title: "Pools",
             tabBarIcon: () => <Text>💰</Text>,
           }}
         />
         <Tabs.Screen
-          name="profile"
+          name="settings"
           options={{
-            title: "Profile",
-            tabBarIcon: () => <Text>🐊</Text>,
-          }}
-        />
-        <Tabs.Screen
-          name = "friends"
-          options={{
-            title: "Friends",
-            tabBarIcon: () => <Text>👥</Text>,
+            title: "Settings",
+            tabBarIcon: () => <Text>⚙️</Text>,
           }}
         />
       </Tabs>

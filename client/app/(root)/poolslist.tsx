@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import { ScrollView, View, Text, StyleSheet, Pressable, Alert } from "react-native";
 import { useRouter } from "expo-router";
-import PoolsBackground from "../../components/PoolsBackground";
-import AuthCard from "../../components/AuthCard";
 import { useSdk } from "@/api/api-provider";
 
 export default function PoolsIndex() {
@@ -17,45 +15,49 @@ export default function PoolsIndex() {
   };
 
   return (
-    <PoolsBackground title="Your Pools">
-      <ScrollView contentContainerStyle={styles.container}>
-        <AuthCard>
-          <View style={styles.headerRow}>
-            <Text style={styles.title}>My Pools</Text>
-            <Pressable style={styles.createButton} onPress={onCreatePool}>
-              <Text style={styles.createButtonText}>Create Pool</Text>
-            </Pressable>
-          </View>
+    <ScrollView contentContainerStyle={styles.container}>
+      <View style={styles.section}>
+        <View style={styles.headerRow}>
+          <Text style={styles.sectionTitle}>My Pools</Text>
+          <Pressable style={styles.createButton} onPress={onCreatePool}>
+            <Text style={styles.createButtonText}>Create Pool</Text>
+          </Pressable>
+        </View>
 
-          <View style={styles.list}>
-            {pools.length === 0 ? (
-              <View style={styles.emptyState}>
-                <Text style={styles.emptyText}>No pools yet</Text>
-                <Text style={styles.emptySubtext}>Create a pool to get started</Text>
-              </View>
-            ) : (
-              pools.map((p) => (
-                <Pressable key={p.id} style={styles.poolItem} onPress={() => {
+        <View style={styles.list}>
+          {pools.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyText}>No pools yet</Text>
+              <Text style={styles.emptySubtext}>Create a pool to get started</Text>
+            </View>
+          ) : (
+            pools.map((p) => (
+              <Pressable
+                key={p.id}
+                style={styles.poolItem}
+                onPress={() => {
                   // TODO: Navigate to pool details page when created
                   // router.push(`/(pools)/${p.id}`);
-                }}>
-                  <View>
-                    <Text style={styles.poolName}>{p.name}</Text>
-                    <Text style={styles.poolBalance}>${p.balance.toFixed(2)}</Text>
-                  </View>
-                </Pressable>
-              ))
-            )}
-          </View>
-        </AuthCard>
-      </ScrollView>
-    </PoolsBackground>
+                }}
+              >
+                <View>
+                  <Text style={styles.poolName}>{p.name}</Text>
+                  <Text style={styles.poolBalance}>${p.balance.toFixed(2)}</Text>
+                </View>
+              </Pressable>
+            ))
+          )}
+        </View>
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: 12,
+    flexGrow: 1,
+    backgroundColor: "#F5F4F7",
+    padding: 16,
   },
   headerRow: {
     flexDirection: "row",
@@ -79,6 +81,30 @@ const styles = StyleSheet.create({
   },
   list: {
     marginTop: 8,
+  },
+  section: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 24,
+    marginBottom: 16,
+    minHeight: 300,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 8,
+  },
+  placeholder: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 8,
+    padding: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  placeholderText: {
+    color: "#888",
+    fontStyle: "italic",
   },
   poolItem: {
     borderWidth: 1,

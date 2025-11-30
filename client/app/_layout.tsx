@@ -1,5 +1,6 @@
 import { Stack, router } from "expo-router";
 import { useEffect, useState } from "react";
+import { loadTokens } from "@/api/tokens";
 
 export default function RootLayout() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
@@ -10,7 +11,9 @@ export default function RootLayout() {
 
   const checkAuthStatus = async () => {
     try {
-      setIsLoggedIn(true);
+      // Load tokens from secure storage and consider user logged in if a session token exists.
+      const tokens = await loadTokens();
+      setIsLoggedIn(!!tokens.sessionToken);
     } catch (error) {
       console.error("Error checking auth:", error);
       setIsLoggedIn(false);

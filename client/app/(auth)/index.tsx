@@ -12,6 +12,7 @@ export default function IdentifierScreen() {
   const api = useApi();
 
   const [id, setId] = useState("");
+  const [busy, setBusy] = useState(false);
   const trimmed = id.trim();
 
   const onContinue = async () => {
@@ -21,21 +22,30 @@ export default function IdentifierScreen() {
     }
     const usesEmail = validateEmail(trimmed);
     const identifier = usesEmail ? trimmed : normalizeUsername(trimmed);
+    setBusy(true);
+    try {
+      const exists = await api.doesUserExist({
+        ...(usesEmail ? { email: identifier } : {}),
+        ...(!usesEmail ? { userName: identifier } : {}),
+      });
 
-    if (await api.doesUserExist({
-      ...(usesEmail ? { email: identifier } : {}),
-      ...(!usesEmail ? { userName: identifier } : {}),
-    })) {
-       // Go to password screen; it will perform the actual login API call.
-      router.push({
-        pathname: "/(auth)/password",
-        params: { type: usesEmail ? "email" : "username", value: identifier },
-      });
-    } else {
-      // Go to sign up screen; it will perform the actual sign up API call.
-      router.push({
-        pathname: "/(auth)/signup",
-      });
+      if (exists) {
+        // Go to password screen; it will perform the actual login API call.
+        router.push({
+          pathname: "/(auth)/password",
+          params: { type: usesEmail ? "email" : "username", value: identifier },
+        });
+      } else {
+        // Go to sign up screen; it will perform the actual sign up API call.
+        router.push({
+          pathname: "/(root)/homepage",
+        });
+      }
+    } catch (e) {
+      //Because of network or server error 
+      Alert.alert("Network error", "Please try again.");
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -51,7 +61,7 @@ export default function IdentifierScreen() {
             placeholder="you@ufl.edu or your_username"
             autoCapitalize="none"
             autoCorrect={false}
-            keyboardType="email-address"
+            keyboardType="default"
             value={id}
             onChangeText={setId}
             style={{ borderWidth: 1, borderRadius: 10, padding: 12 }}
@@ -59,15 +69,16 @@ export default function IdentifierScreen() {
 
           <Pressable
             onPress={onContinue}
+            disabled={busy}
             style={{
-              backgroundColor: "#1428A0",
+              backgroundColor: busy ? "#94a3b8" : "#1428A0",
               padding: 14,
               borderRadius: 10,
               alignItems: "center",
               marginTop: 8,
             }}
           >
-            <Text style={{ color: "white", fontWeight: "600" }}>Continue</Text>
+            <Text style={{ color: "white", fontWeight: "600" }}>{busy ? "Checking…" : "Continue"}</Text>
           </Pressable>
         </View>
       </AuthCard>

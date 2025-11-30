@@ -1,34 +1,23 @@
-// import { Router } from "express";
-// import { auth } from "../middleware/auth-middleware";
-// const router = Router();
+import { Router } from "express";
 
-// /**
-//  * getTransactions(token, group_id, start, limit) -> Transaction[]
-//  * GET /groups/:group_id/transactions?start=&limit=
-//  */
-// router.get("/groups/:group_id/transactions", auth, async (req, res) => {
-//   // const { start = 0, limit = 20 } = req.query;
-//   // TODO: controller.getTransactions(req.user, req.params.group_id, { start, limit })
-//   res.status(501).json({ message: "getTransactions not implemented yet" });
-// });
+import { transactionCreateTransactionEndpoint, transactionDeleteTransactionEndpoint, transactionGetTransactionsEndpoint } from "@money-pool-app/shared";
 
-// /**
-//  * createTransaction(token, group_id, user_id, amount, description) -> transaction_id
-//  * POST /groups/:group_id/transactions
-//  * body: { user_id, amount, description }
-//  */
-// router.post("/groups/:group_id/transactions", auth, async (req, res) => {
-//   // TODO: controller.createTransaction(req.user, req.params.group_id, req.body)
-//   res.status(501).json({ message: "createTransaction not implemented yet" });
-// });
+import { TransactionDao } from "../daos/transaction-dao";
+import { TransactionController } from "../controllers/transaction-controller";
 
-// /**
-//  * deleteTransaction(token, transaction_id)
-//  * DELETE /transactions/:transaction_id
-//  */
-// router.delete("/transactions/:transaction_id", auth, async (req, res) => {
-//   // TODO: controller.deleteTransaction(req.user, req.params.transaction_id)
-//   res.status(501).json({ message: "deleteTransaction not implemented yet" });
-// });
+const removePrefix = (fullPath: string): string => {
+    const secondSlashIndex = fullPath.indexOf('/', 1);
+    return secondSlashIndex === -1 ? '/' : fullPath.substring(secondSlashIndex);
+};
 
-// export default router;
+export const getTransactionRouter = (transactionDao: TransactionDao): Router => {
+    const router = Router();
+
+    const controller = new TransactionController(transactionDao);
+
+    router.all(removePrefix(transactionGetTransactionsEndpoint), controller.getTransactions);
+    router.all(removePrefix(transactionCreateTransactionEndpoint), controller.createTransaction);
+    router.all(removePrefix(transactionDeleteTransactionEndpoint), controller.deleteTransaction);
+
+    return router;
+}

@@ -32,14 +32,14 @@ interface DbPool {
     _id: string;
     name: string;
     owner: string;
-    members: string[];
+    members: { [userId: string]: number };
     balance: number;
 }
 const poolSchema = new Schema({
     _id: { type: String, required: true },
     name: { type: String, required: true },
     owner: { type: String, required: true },
-    members: [String],
+    members: { type: Map, of: Number, required: true },
     balance: { type: Number, required: true },
 });
 export const PoolModel = model("Pool", poolSchema);

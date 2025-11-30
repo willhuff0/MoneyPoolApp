@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const initDb = async (): Promise<mongoose.mongo.ClientSession | null> => {
+const initDb = async (): Promise<mongoose.Mongoose | null> => {
   try {
     const mongoUri = process.env.MONGO_URI;
 
@@ -9,11 +9,10 @@ const initDb = async (): Promise<mongoose.mongo.ClientSession | null> => {
     }
 
     const db = await mongoose.connect(mongoUri);
-    const session = await db.startSession();
 
     console.log('MongoDB connected successfully!');
 
-    return session;
+    return db;
   } catch (error) {
     console.error('MongoDB connection failed:', error);
 

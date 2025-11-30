@@ -1,5 +1,5 @@
 import React from "react";
-import { ScrollView, View, Text, StyleSheet, Button } from "react-native";
+import { ScrollView, View, Text, StyleSheet, Pressable } from "react-native";
 import { CircularProgressbar , buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import { useApi } from "@/api/api-provider";
@@ -62,14 +62,14 @@ export default function Homepage() {
           </View>
         </View>
         {/* Friend Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Friends</Text>
-          <View style={styles.placeholder}>
-            <Button title="Add friends" color="#0A2463" onPress={() => {
-              router.push("/(root)/addfriends");
-            }} />
+         <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Friends</Text>
+            <Pressable style={styles.addButton} onPress={() => router.push("/(root)/addfriends")}>
+              <Text style={styles.addButtonText}>Add Friend</Text>
+            </Pressable>
           </View>
-        </View>
+          </View>
       </ScrollView>
     );
   }
@@ -102,6 +102,24 @@ export default function Homepage() {
       fontSize: 18,
       fontWeight: "bold",
       marginBottom: 8,
+    },
+
+    sectionHeader: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 8,
+    },
+    addButton: {
+      backgroundColor: "#1428A0",
+      paddingVertical: 6,
+      paddingHorizontal: 12,
+      borderRadius: 8,
+    },
+    addButtonText: {
+      color: "#fff",
+      fontWeight: "600",
+      fontSize: 14,
     },
     placeholder: {
       borderWidth: 1,

@@ -41,3 +41,10 @@ export default function RootLayout() {
     </Stack>
   );
 }
+
+//Flow: 
+//Launch to homepage if logged in 
+//Else go to auth screens 
+//From homepage can navigate to add friends page
+//Navigation bar for homepage, pools list, and settings
+//From pools list -> specific pool view, create pool, manage pool

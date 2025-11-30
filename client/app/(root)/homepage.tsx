@@ -1,10 +1,12 @@
 import React from "react";
-import { ScrollView, View, Text, StyleSheet } from "react-native";
+import { ScrollView, View, Text, StyleSheet, Button } from "react-native";
 import { CircularProgressbar } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import { useApi } from "@/api/api-provider";
+import { useRouter } from "expo-router";
 
 export default function Homepage() {
+    const router = useRouter();
     const { activeUser } = useApi();
     const chompScore = activeUser?.chompScore || 0;
     let chompScoreText = "";
@@ -56,7 +58,9 @@ export default function Homepage() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Friends</Text>
           <View style={styles.placeholder}>
-            <Text style={styles.placeholderText}>[Press Add Friends to get started!]</Text>
+            <Button title="Add friends" color="#0A2463" onPress={() => {
+              router.push("/(root)/addfriends");
+            }} />
           </View>
         </View>
       </ScrollView>

@@ -99,10 +99,10 @@ export class UserDao {
                 
                 toUser.friends.push(fromUserId);
                 toUser.incomingFriendRequests = toUser.incomingFriendRequests.filter(userId => userId !== fromUserId);
-                toUser.save({ session });
+                await toUser.save({ session });
 
                 fromUser.friends.push(toUserId);
-                fromUser.save({ session });
+                await fromUser.save({ session });
 
                 return true;
             });

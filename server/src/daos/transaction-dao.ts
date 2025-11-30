@@ -19,7 +19,7 @@ export class TransactionDao {
                 if (userBalance == undefined) return false;
 
                 pool.members.set(userId, userBalance + amount);
-                pool.save({ session });
+                await pool.save({ session });
                 
                 await TransactionModel.create({
                     _id: transactionId,
@@ -43,11 +43,16 @@ export class TransactionDao {
                 const transaction = await TransactionModel.findById(transactionId, { session });
                 if (transaction == null) return false;
 
-                if (transaction.userId !== checkUserId) {
-                    const pool = await PoolModel.findById(transaction.poolId, { session });
-                    if (pool == null) return false;
-                    if (pool.owner !== checkUserId) return false;
-                }
+                const pool = await PoolModel.findById(transaction.poolId, { session });
+                if (pool == null) return false;
+
+                if (transaction.userId !== checkUserId && pool.owner !== checkUserId) return false;
+
+                const userBalance = pool.members.get(transaction.userId);
+                if (userBalance == undefined) return false;
+
+                pool.members.set(transaction.userId, userBalance - transaction.amount);
+                await pool.save({ session });
 
                 await transaction.deleteOne({ session });
                 return true;

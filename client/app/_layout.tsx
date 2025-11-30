@@ -7,27 +7,26 @@ export default function RootLayout() {
   useEffect(() => {
     checkAuthStatus();
   }, []);
-//hi
+
   const checkAuthStatus = async () => {
     try {
-      // TESTING: Skip auth check - always show root layout
       setIsLoggedIn(true);
-      router.replace("/(root)/homepage");
-      // const token = await AsyncStorage.getItem("sessionToken");
-      // setIsLoggedIn(!!token);
-      // 
-      // // Navigate based on auth status
-      // if (!token) {
-      //   router.replace("/(auth)");
-      // }
     } catch (error) {
       console.error("Error checking auth:", error);
       setIsLoggedIn(false);
-      router.replace("/(auth)");
     }
   };
 
-  // Loading state - show nothing while checking
+  //Check if logged in and redirect to home page if so 
+  useEffect(() => {
+    if (isLoggedIn === null) return;
+    if (isLoggedIn) {
+      router.replace("/(root)/homepage");
+    } else {
+      router.replace("/(auth)");
+    }
+  }, [isLoggedIn]);
+
   if (isLoggedIn === null) {
     return null;
   }

@@ -12,11 +12,17 @@ export default function homepage() {
           </View>
         </View>
   
-        {/* Notifications */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Notifications</Text>
+          <Text style={styles.sectionTitle}>Friend Requests</Text>
           <View style={styles.placeholder}>
-            <Text style={styles.placeholderText}>[Notifications List]</Text>
+            <Text style={styles.placeholderText}>[Incoming Friend Requests]</Text>
+          </View>
+        </View>
+        {/* Friend Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Friends</Text>
+          <View style={styles.placeholder}>
+            <Text style={styles.placeholderText}>[Press Add Friends to get started!]</Text>
           </View>
         </View>
       </ScrollView>

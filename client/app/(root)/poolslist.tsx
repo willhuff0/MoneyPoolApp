@@ -57,6 +57,7 @@ export default function PoolsIndex() {
   );
 }
 
+//Stylesheet cohesive with homepage, reusing container, section, and sectionTitle styles
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
@@ -119,8 +120,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   poolName: {
-    fontSize: 16,
-    fontWeight: "600",
+    fontSize: 18,
+    fontWeight: "700",
   },
   poolBalance: {
     color: "#666",

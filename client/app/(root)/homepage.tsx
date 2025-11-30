@@ -112,7 +112,7 @@ export default function Homepage() {
       justifyContent: "center",
     },
     placeholderText: {
-      color: "#888",
+      color: "#afafafff",
       fontStyle: "italic",
     },
   });

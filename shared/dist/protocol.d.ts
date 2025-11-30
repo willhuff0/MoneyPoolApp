@@ -1,4 +1,4 @@
-import { Pool, User } from "./json";
+import { Pool, Transaction, User } from "./json";
 export interface ErrorResponse {
     code?: number;
     message: string;
@@ -112,5 +112,27 @@ export declare const poolRemoveMemberEndpoint = "/pool/removeMember";
 export interface PoolRemoveMemberRequest {
     poolId: string;
     userId: string;
+}
+export declare const transactionGetTransactionsEndpoint = "/transaction/getTransactions";
+export interface TransactionGetTransactionsRequest {
+    poolId: string;
+    start?: number;
+    limit?: number;
+}
+export interface TransactionGetTransactionsResponse {
+    transactions: Transaction[];
+}
+export declare const transactionCreateTransactionEndpoint = "/transaction/createTransaction";
+export interface TransactionCreateTransactionRequest {
+    poolId: string;
+    amount: number;
+    description: string;
+}
+export interface TransactionCreateTransactionResponse {
+    transactionId: string;
+}
+export declare const transactionDeleteTransactionEndpoint = "/transaction/deleteTransaction";
+export interface TransactionDeleteTransactionRequest {
+    transactionId: string;
 }
 //# sourceMappingURL=protocol.d.ts.map

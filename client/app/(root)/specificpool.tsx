@@ -11,20 +11,26 @@ export default function SpecificPool() {
   
   const [pool, setPool] = useState<any>(null);
   const [loading, setLoading] = useState(false);
-  //For testing: set true for owner view, false for member view
   const [isOwner, setIsOwner] = useState(true);
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [splitMessages, setSplitMessages] = useState<any[]>([]);
+
   useEffect(() => {
-    // Mock pool data
     setPool({
       poolId: "mock-pool-1",
-      displayName: "Weekend Trip",
+      displayName: "Test Trip",
       ownerUserId: activeUser?.userId,
       members: ["user1", "user2"],
-      balance: 123.45,
+      balance: 420.69,
     });
+
+    setTransactions([
+      { transactionId: "1", description: "Dinner at restaurant", amount: 45.50, userId: "user1", userName: "Alice" },
+      { transactionId: "2", description: "Gas for road trip", amount: 32.00, userId: "user2", userName: "Bob" },
+    ]);
     
-    // Will uncoment when connecting to backend
     // loadPool();
+    // loadTransactions();
   }, [poolId]);
 
   async function loadPool() {
@@ -35,7 +41,6 @@ export default function SpecificPool() {
       const poolData = await sdk.pool.getPool(poolId);
       if (poolData) {
         setPool(poolData);
-        // Check if current user is the owner
         setIsOwner(poolData.ownerUserId === activeUser?.userId);
       }
     } catch (e) {
@@ -45,23 +50,53 @@ export default function SpecificPool() {
     }
   }
 
-  function onSplitTotal() { 
-    console.log("Split total");
+  async function loadTransactions() {
+    if (!poolId || typeof poolId !== 'string') return;
+    
+    try {
+      const data = await sdk.transaction.getTransactions(poolId);
+      if (data) {
+        setTransactions(data);
+      }
+    } catch (e) {
+      console.error("Error loading transactions:", e);
+    }
   }
 
-  function onManageMembers() {
-    //Will take to page to view members
-    console.log("Manage members");
+  function onSplitTotal() {
+    if (!pool || !pool.balance) return;
+    
+    const memberCount = pool.members?.length || 0;
+    if (memberCount === 0) {
+      alert("No members in pool");
+      return;
+    }
+
+    const totalBeforeSplit = pool.balance;
+    const splitAmount = (pool.balance / memberCount).toFixed(2);
+    
+    //split message contains previous total and amount ower per pool member (including owner)
+    const splitMessage = {
+      id: `split-${Date.now()}`,
+      message: `You pool's total of $${totalBeforeSplit.toFixed(2)} was split. You owe $${splitAmount}`,
+    };
+    
+    setSplitMessages([...splitMessages, splitMessage]);
+    
+    //After splitting, balance should be 0 incase more transactions are added after 
+    setPool({ ...pool, balance: 0 });
+  }
+
+  function onManagePool() {
+    router.push(`/(root)/managepool?poolId=${poolId}`);
   }
 
   function onViewMembers() {
-    // Lists members of pool
-    console.log("View members");
+    router.push(`/(root)/managepool?poolId=${poolId}`);
   }
 
   function onAddTransaction() {
-    //Add Transaction API call
-    console.log("Add transaction");
+    router.push(`/(root)/addtransaction?poolId=${poolId}`);
   }
 
   if (loading) {
@@ -80,12 +115,6 @@ export default function SpecificPool() {
     );
   }
 
-  // Mock transactions for now
-  const transactions = [
-    { id: "1", description: "Dinner at restaurant", amount: 45.50, userId: "user1", userName: "Alice" },
-    { id: "2", description: "Gas for road trip", amount: 32.00, userId: "user2", userName: "Bob" },
-  ];
-
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -97,14 +126,14 @@ export default function SpecificPool() {
         </View>
       </View>
 
-      {/* Owner Controls */}
+      {/* Owner View/Specific Controls */}
       {isOwner ? (
         <View style={styles.ownerControls}>
           <Pressable style={styles.ownerButton} onPress={onSplitTotal}>
             <Text style={styles.ownerButtonText}>Split Total</Text>
           </Pressable>
-          <Pressable style={styles.ownerButton} onPress={onManageMembers}>
-            <Text style={styles.ownerButtonText}>Manage Members</Text>
+          <Pressable style={styles.ownerButton} onPress={onManagePool}>
+            <Text style={styles.ownerButtonText}>Manage Pool</Text>
           </Pressable>
         </View>
       ) : (
@@ -115,21 +144,29 @@ export default function SpecificPool() {
         </View>
       )}
 
-      {/* Transactions Feed */}
+      {/* Transactions and Split Messages Feed */}
+      //One map for transactions and one for split messages
       <ScrollView style={styles.transactionsFeed} contentContainerStyle={styles.transactionsContent}>
-        {transactions.length === 0 ? (
+        {transactions.length === 0 && splitMessages.length === 0 ? (
           <View style={styles.emptyState}>
             <Text style={styles.emptyText}>No transactions yet</Text>
             <Text style={styles.emptySubtext}>Add a transaction to get started</Text>
           </View>
         ) : (
-          transactions.map((transaction) => (
-            <View key={transaction.id} style={styles.transactionBubble}>
-              <Text style={styles.transactionUser}>{transaction.userName}</Text>
-              <Text style={styles.transactionDescription}>{transaction.description}</Text>
-              <Text style={styles.transactionAmount}>${transaction.amount.toFixed(2)}</Text>
-            </View>
-          ))
+          <>
+            {transactions.map((transaction) => (
+              <View key={transaction.transactionId} style={styles.transactionBubble}>
+                <Text style={styles.transactionUser}>{transaction.userName}</Text>
+                <Text style={styles.transactionDescription}>{transaction.description}</Text>
+                <Text style={styles.transactionAmount}>${transaction.amount.toFixed(2)}</Text>
+              </View>
+            ))}
+            {splitMessages.map((split) => (
+              <View key={split.id} style={styles.transactionBubble}>
+                <Text style={styles.splitMessageText}>{split.message}</Text>
+              </View>
+            ))}
+          </>
         )}
       </ScrollView>
 
@@ -142,7 +179,6 @@ export default function SpecificPool() {
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -245,11 +281,21 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 1,
   },
+  transactionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 4,
+  },
   transactionUser: {
     fontSize: 16,
     fontWeight: "600",
     color: "#1428A0",
-    marginBottom: 4,
+  },
+  deleteText: {
+    color: "#dc2626",
+    fontSize: 14,
+    fontWeight: "600",
   },
   transactionDescription: {
     fontSize: 16,
@@ -260,6 +306,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     color: "#FF8C00",
+  },
+  splitMessageText: {
+    fontSize: 15,
+    color: "#1428A0",
+    fontWeight: "bold",
+    textAlign: "center",
   },
   footer: {
     padding: 16,

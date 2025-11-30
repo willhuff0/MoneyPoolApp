@@ -33,12 +33,13 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.validatePoolName = exports.validatePassword = exports.validateEmail = exports.validateUserName = exports.validateDisplayName = void 0;
+exports.validateTransactionDescription = exports.validatePoolName = exports.validatePassword = exports.validateEmail = exports.validateUserName = exports.validateDisplayName = void 0;
 const EmailValidator = __importStar(require("email-validator"));
 const displayNamePattern = /^\S.{0,62}\S$/;
 const userNamePattern = /^[0-9A-Za-z]{6,16}$/;
 const passwordPattern = /^.{8,32}$/;
 const poolNamePattern = /^\S.{0,62}\S$/;
+const transactionDescriptionPattern = /^\S.{0,126}\S$/;
 const validateDisplayName = (displayName) => {
     if (typeof displayName !== "string")
         return false;
@@ -69,3 +70,9 @@ const validatePoolName = (name) => {
     return poolNamePattern.test(name);
 };
 exports.validatePoolName = validatePoolName;
+const validateTransactionDescription = (description) => {
+    if (typeof description !== "string")
+        return false;
+    return transactionDescriptionPattern.test(description);
+};
+exports.validateTransactionDescription = validateTransactionDescription;

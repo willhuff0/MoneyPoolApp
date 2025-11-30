@@ -1,10 +1,9 @@
-import { ApiProvider } from "@/api/api-provider";
 import { Tabs } from "expo-router";
 import { View, Image, Text } from "react-native";
 
 export default function RootLayout() {
   return (
-    <ApiProvider>
+    <>
       {/* --- Top Header --- */}
       <View
         style={{
@@ -65,6 +64,6 @@ export default function RootLayout() {
           }}
         />
       </Tabs>
-    </ApiProvider>
+    </>
   );
 }

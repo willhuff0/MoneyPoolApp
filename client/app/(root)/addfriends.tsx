@@ -1,7 +1,5 @@
 import React, { useState } from "react";
-import { Alert, Pressable, Text, TextInput, View, StyleSheet } from "react-native";
-import AuthBg from "../../components/AuthBg";
-import AuthCard from "../../components/AuthCard";
+import { Alert, Pressable, Text, TextInput, View, StyleSheet, ScrollView } from "react-native";
 //For connecting to API 
 import { useSdk } from "@/api/api-provider";
 
@@ -59,50 +57,66 @@ export default function AddFriendsScreen() {
   }
 
   return (
-    <AuthBg title="Find Friends">
-      <AuthCard>
-        <View style={{ gap: 12 }}>
-          <Text style={{ fontSize: 18, fontWeight: "700" }}>Find friends by username</Text>
+    <ScrollView contentContainerStyle={styles.container}>
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Find friends by username</Text>
 
-          <TextInput
-            placeholder="username"
-            autoCapitalize="none"
-            value={query}
-            onChangeText={setQuery}
-            style={styles.input}
-            editable={!searching}
-            onSubmitEditing={onSearch}
-          />
+        <TextInput
+          placeholder="username"
+          autoCapitalize="none"
+          value={query}
+          onChangeText={setQuery}
+          style={styles.input}
+          editable={!searching}
+          onSubmitEditing={onSearch}
+        />
 
-          <Pressable onPress={onSearch} style={[styles.button, { backgroundColor: searching ? "#94a3b8" : "#1428A0" }]} disabled={searching}>
-            <Text style={{ color: "white", fontWeight: "600" }}>{searching ? "Searching…" : "Search"}</Text>
-          </Pressable>
+        <Pressable onPress={onSearch} style={[styles.button, { backgroundColor: searching ? "#94a3b8" : "#1428A0" }]} disabled={searching}>
+          <Text style={{ color: "white", fontWeight: "600" }}>{searching ? "Searching…" : "Search"}</Text>
+        </Pressable>
 
-          {error ? <Text style={{ color: "#ef4444" }}>{error}</Text> : null}
+        {error ? <Text style={{ color: "#ef4444", marginTop: 12 }}>{error}</Text> : null}
 
-          {found ? (
-            <View style={styles.result}>
-              <View>
-                <Text style={{ fontWeight: "700" }}>{found.displayName ?? found.userName}</Text>
-                <Text style={{ color: "#6b7280" }}>@{found.userName}</Text>
-              </View>
-              <Pressable style={styles.addButton} onPress={onAddFriend}>
-                <Text style={{ color: "#061635", fontWeight: "700" }}>Add</Text>
-              </Pressable>
+        {found ? (
+          <View style={styles.result}>
+            <View>
+              <Text style={{ fontWeight: "700" }}>{found.displayName ?? found.userName}</Text>
+              <Text style={{ color: "#6b7280" }}>@{found.userName}</Text>
             </View>
-          ) : null}
-        </View>
-      </AuthCard>
-    </AuthBg>
+            <Pressable style={styles.addButton} onPress={onAddFriend}>
+              <Text style={{ color: "#fff", fontWeight: "700" }}>Add</Text>
+            </Pressable>
+          </View>
+        ) : null}
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flexGrow: 1,
+    backgroundColor: "#F5F4F7",
+    padding: 16,
+  },
+  section: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 24,
+    marginBottom: 16,
+    minHeight: 300,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 16,
+  },
   input: {
     borderWidth: 1,
     borderColor: "#ddd",
     borderRadius: 10,
     padding: 12,
+    marginBottom: 12,
   },
   button: {
     padding: 12,
@@ -112,17 +126,16 @@ const styles = StyleSheet.create({
   result: {
     marginTop: 12,
     padding: 12,
-    backgroundColor: "#fff",
+    backgroundColor: "#F5F4F7",
     borderRadius: 10,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
   addButton: {
-    backgroundColor: "#c87119ff",
+    backgroundColor: "#1428A0",
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 8,
   },
 });
-

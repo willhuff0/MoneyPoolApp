@@ -1,8 +1,6 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TextInput, Pressable, Alert } from "react-native";
+import { ScrollView, View, Text, StyleSheet, TextInput, Pressable, Alert } from "react-native";
 import { useRouter } from "expo-router";
-import PoolsBackground from "../../components/PoolsBackground";
-import AuthCard from "../../components/AuthCard";
 
 export default function CreatePool() {
   const router = useRouter();
@@ -16,27 +14,41 @@ export default function CreatePool() {
   }
 
   return (
-    <PoolsBackground title="Create Pool">
-      <View style={styles.container}>
-        <AuthCard>
-          <Text style={styles.label}>Pool name</Text>
-          <TextInput style={styles.input} value={name} onChangeText={setName} placeholder="e.g. Weekend Trip" />
+    <ScrollView contentContainerStyle={styles.container}>
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Create Pool</Text>
 
-          <Text style={[styles.label, { marginTop: 12 }]}>Initial amount</Text>
-          <TextInput style={styles.input} value={initialAmount} onChangeText={setInitialAmount} placeholder="0.00" keyboardType="numeric" />
+        <Text style={styles.label}>Pool name</Text>
+        <TextInput style={styles.input} value={name} onChangeText={setName} placeholder="e.g. Weekend Trip" />
 
-          <Pressable style={styles.button} onPress={onCreate}>
-            <Text style={styles.buttonText}>Create</Text>
-          </Pressable>
-        </AuthCard>
+        <Text style={[styles.label, { marginTop: 12 }]}>Initial amount</Text>
+        <TextInput style={styles.input} value={initialAmount} onChangeText={setInitialAmount} placeholder="0.00" keyboardType="numeric" />
+
+        <Pressable style={styles.button} onPress={onCreate}>
+          <Text style={styles.buttonText}>Create</Text>
+        </Pressable>
       </View>
-    </PoolsBackground>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: 12,
+    flexGrow: 1,
+    backgroundColor: "#F5F4F7",
+    padding: 16,
+  },
+  section: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 24,
+    marginBottom: 16,
+    minHeight: 300,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 16,
   },
   label: {
     fontSize: 14,
@@ -52,13 +64,13 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 16,
-    backgroundColor: "#061635",
+    backgroundColor: "#1428A0",
     paddingVertical: 12,
     borderRadius: 10,
     alignItems: "center",
   },
   buttonText: {
-    color: "#FFA500",
+    color: "#fff",
     fontWeight: "700",
   },
 });

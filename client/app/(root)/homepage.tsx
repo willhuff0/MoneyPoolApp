@@ -1,6 +1,6 @@
 import React from "react";
 import { ScrollView, View, Text, StyleSheet, Button } from "react-native";
-import { CircularProgressbar } from "react-circular-progressbar";
+import { CircularProgressbar , buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import { useApi } from "@/api/api-provider";
 import { useRouter } from "expo-router";

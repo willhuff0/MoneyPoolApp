@@ -1,13 +1,13 @@
 import React from "react";
-import { ScrollView, View, Text, StyleSheet, Pressable } from "react-native";
-import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
+import { ScrollView, View, Text, StyleSheet, Button } from "react-native";
+import { CircularProgressbar , buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import { useApi } from "@/api/api-provider";
 import { useRouter } from "expo-router";
 
 export default function Homepage() {
-    const { activeUser } = useApi();
     const router = useRouter();
+    const { activeUser } = useApi();
     const chompScore = activeUser?.chompScore || 0;
     let chompScoreText = "";
     let advice = "";
@@ -36,13 +36,20 @@ export default function Homepage() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Chomp Score</Text>
           <View style={styles.placeholder}>
-            <View style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: 100 }}>
+            <View style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: 70 }}>
               <View style={{ width: 200, height: 200 }}>
-                <CircularProgressbar value={chompScore} maxValue={100} text={`${chompScore}`} styles={{ path: { stroke: pathColor }, text: { fill: textColor } }} />
+                <CircularProgressbar 
+                  value={chompScore} 
+                  maxValue={100} 
+                  text={`${chompScore}`} 
+                  styles={{ path: { stroke: pathColor }, 
+                  text: { fill: textColor } }} 
+                />
               </View>
-              <View style={{flexDirection: "column", alignItems: "center"}}>
-                <Text style={{ fontSize: 24, fontWeight: "bold" }}>{chompScoreText}</Text>
-                <Text>{advice}</Text>
+
+              <View style={{flex:1, flexDirection: "column", alignItems: "center"}}>
+                <Text style={{ fontSize: 24, fontWeight: "bold", flexShrink: 1, flexWrap: "wrap" }}>{chompScoreText}</Text>
+                <Text style= {{flexShrink: 1, textAlign: "center", flexWrap: "wrap"}}>{advice}</Text>
               </View>
             </View>
           </View>
@@ -56,14 +63,11 @@ export default function Homepage() {
         </View>
         {/* Friend Section */}
         <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Friends</Text>
-            <Pressable style={styles.addButton} onPress={() => router.push("/(root)/addfriends")}>
-              <Text style={styles.addButtonText}>Add Friend</Text>
-            </Pressable>
-          </View>
+          <Text style={styles.sectionTitle}>Friends</Text>
           <View style={styles.placeholder}>
-            <Text style={styles.placeholderText}>[Press Add Friends to get started!]</Text>
+            <Button title="Add friends" color="#0A2463" onPress={() => {
+              router.push("/(root)/addfriends");
+            }} />
           </View>
         </View>
       </ScrollView>
@@ -98,23 +102,6 @@ export default function Homepage() {
       fontSize: 18,
       fontWeight: "bold",
       marginBottom: 8,
-    },
-    sectionHeader: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginBottom: 8,
-    },
-    addButton: {
-      backgroundColor: "#1428A0",
-      paddingVertical: 6,
-      paddingHorizontal: 12,
-      borderRadius: 8,
-    },
-    addButtonText: {
-      color: "#fff",
-      fontWeight: "600",
-      fontSize: 14,
     },
     placeholder: {
       borderWidth: 1,

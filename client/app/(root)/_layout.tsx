@@ -1,6 +1,6 @@
-import { ApiProvider } from "@/api/api-provider";
 import { Tabs } from "expo-router";
 import { View, Image, Text } from "react-native";
+import { ApiProvider } from "@/api/api-provider";
 
 export default function RootLayout() {
   return (

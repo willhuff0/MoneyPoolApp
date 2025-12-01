@@ -10,7 +10,6 @@ export default function Settings() {
 
   async function handleLogout() {
     await api.signOut();
-    router.replace("/(auth)");
   }
 
   return (

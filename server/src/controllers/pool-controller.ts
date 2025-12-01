@@ -25,6 +25,16 @@ export class PoolController {
         let pools = await Promise.all(body.poolIds.map((poolId) => this.poolDao.getPoolById(poolId)));
         pools = pools.filter((pool) => pool?.members.has(sessionToken.userId) ?? false);
 
+        console.log(pools.map((pool) => {
+                return {
+                    poolId: pool!._id,
+                    displayName: pool!.name,
+                    ownerUserId: pool!.owner,
+                    members: pool!.members,
+                    balance: pool!.balance,
+                };
+            }));
+
         res.status(200).json({
             pools: pools.map((pool) => {
                 return {

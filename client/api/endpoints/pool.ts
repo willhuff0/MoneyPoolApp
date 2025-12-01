@@ -8,6 +8,9 @@ export const getPools = (client: AxiosInstance) => async (poolIds: string[]): Pr
     if (response.status !== 200) return [];
 
     const body = response.data as Protocol.PoolGetPoolsResponse;
+    for (let pool of body.pools) {
+        pool.members = new Map(Object.entries(pool.members));
+    }
     return body.pools;
 }
 

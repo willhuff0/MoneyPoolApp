@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ScrollView, View, Text, StyleSheet, Pressable } from "react-native";
+import { View, Text, StyleSheet, Pressable } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSdk, useApi } from "@/api/api-provider";
 import { Pool } from "@money-pool-app/shared";
@@ -16,8 +16,6 @@ export default function SpecificPool() {
   const [error, setError] = useState<unknown>(null);
 
   const [isOwner, setIsOwner] = useState(false);
-  const [transactions, setTransactions] = useState<any[]>([]);
-  const [splitMessages, setSplitMessages] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -34,34 +32,10 @@ export default function SpecificPool() {
     };
 
     fetchData();
-    setTransactions([
-      { transactionId: "1", description: "Dinner at restaurant", amount: 45.50, userId: "user1", userName: "Alice" },
-      { transactionId: "2", description: "Gas for road trip", amount: 32.00, userId: "user2", userName: "Bob" },
-    ]);
   }, [poolId]);
 
   function onSplitTotal() {
-    if (!pool || !pool.balance) return;
-    
-    const memberCount = pool.members.keys.length || 0;
-    if (memberCount === 0) {
-      alert("No members in pool");
-      return;
-    }
-
-    const totalBeforeSplit = pool.balance;
-    const splitAmount = (pool.balance / memberCount).toFixed(2);
-    
-    //split message contains previous total and amount ower per pool member (including owner)
-    const splitMessage = {
-      id: `split-${Date.now()}`,
-      message: `You pool's total of $${totalBeforeSplit.toFixed(2)} was split. You owe $${splitAmount}`,
-    };
-    
-    setSplitMessages([...splitMessages, splitMessage]);
-    
-    //After splitting, balance should be 0 incase more transactions are added after 
-    setPool({ ...pool, balance: 0 });
+    router.push(`/(root)/splittotal?poolId=${poolId}`);
   }
 
   function onManagePool() {

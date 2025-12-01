@@ -69,6 +69,7 @@ export class TransactionDao {
         return await TransactionModel.find({
             poolId,
         })
+            .sort({ timestamp: -1 })
             .skip(start)
             .limit(count)
             .exec();

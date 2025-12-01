@@ -40,9 +40,8 @@ export class PoolDao {
                 if (pool == null) return false;
                 if (pool.owner !== checkOwnerId) return false;
 
-                await pool.updateOne({
-                    $addToSet: { members: userId }
-                }, { session });
+                pool.members.set(userId, 0);
+                await pool.save({ session });
 
                 await UserModel.findByIdAndUpdate(userId, {
                     $addToSet: { pools: poolId },
@@ -63,9 +62,8 @@ export class PoolDao {
                 if (pool == null) return false;
                 if (pool.owner !== checkOwnerId) return false;
 
-                await pool.updateOne({
-                    $pull: { members: userId }
-                }, { session });
+                pool.members.delete(userId);
+                await pool.save({ session });
 
                 await UserModel.findByIdAndUpdate(userId, {
                     $pull: { pools: poolId },

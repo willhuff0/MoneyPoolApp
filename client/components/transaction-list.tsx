@@ -10,21 +10,48 @@ interface TransactionListProps {
 export function TransactionList({ poolId }: TransactionListProps) {
   const sdk = useSdk();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  // Initialize isLoading to true to prevent race conditions with onEndReached on mount
+  const [isLoading, setIsLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
   const [start, setStart] = useState(0);
+  const [userNames, setUserNames] = useState<Record<string, string>>({});
   const LIMIT = 20;
+
+  const fetchMissingUsers = async (txs: Transaction[]) => {
+    const uniqueIds = [...new Set(txs.map(t => t.userId))];
+    const missingIds = uniqueIds.filter(id => !userNames[id]);
+    
+    if (missingIds.length === 0) return;
+
+    const newNames: Record<string, string> = {};
+    await Promise.all(missingIds.map(async (id) => {
+      try {
+        const user = await sdk.user.getUser(id);
+        if (user) newNames[id] = user.displayName;
+      } catch (e) {
+        console.warn(`Failed to fetch user ${id}`, e);
+      }
+    }));
+    
+    setUserNames(prev => ({ ...prev, ...newNames }));
+  };
 
   useEffect(() => {
     let isMounted = true;
     const fetchInitial = async () => {
+      // Reset state for new poolId to avoid showing stale data or appending to it
+      setTransactions([]);
+      setStart(0);
+      setHasMore(true);
       setIsLoading(true);
+
       try {
         const data = await sdk.transaction.getTransactions(poolId, 0, LIMIT);
         if (isMounted && data) {
           setTransactions(data);
           setStart(data.length);
           setHasMore(data.length >= LIMIT);
+          fetchMissingUsers(data);
         }
       } catch (e) {
         console.error("Error loading transactions:", e);
@@ -47,6 +74,7 @@ export function TransactionList({ poolId }: TransactionListProps) {
         setTransactions((prev) => [...prev, ...data]);
         setStart((prev) => prev + data.length);
         if (data.length < LIMIT) setHasMore(false);
+        fetchMissingUsers(data);
       } else {
         setHasMore(false);
       }
@@ -60,7 +88,9 @@ export function TransactionList({ poolId }: TransactionListProps) {
   const renderItem = ({ item }: { item: Transaction }) => (
     <View style={styles.transactionBubble}>
       <View style={styles.transactionHeader}>
-        <Text style={styles.transactionUser}>{item.userId}</Text>
+        <Text style={styles.transactionUser}>
+          {userNames[item.userId] || item.userId}
+        </Text>
         <Text style={styles.transactionDate}>
           {new Date(item.timestamp).toLocaleDateString()}
         </Text>

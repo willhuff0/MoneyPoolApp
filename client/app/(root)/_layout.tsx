@@ -3,8 +3,7 @@ import { Tabs } from "expo-router";
 import { View, Image, Text } from "react-native";
 
 export default function RootLayout() {
-  return (
-  <ApiProvider>
+  return (<>
     {/* --- Top Header --- */}
     <View
       style={{
@@ -93,7 +92,13 @@ export default function RootLayout() {
             href: null
           }}
         />
+        <Tabs.Screen
+          name="splittotal"
+          options={{
+            href: null
+          }}
+        />
       </Tabs>
-    </ApiProvider>
+    </>
   );
 }

@@ -52,4 +52,4 @@ const createApiClient = (baseUrl: string): AxiosInstance => {
     return client;
 }
 
-export const apiClient = createApiClient(process.env.SERVER_URI ?? 'http://localhost:8080');
+export const apiClient = createApiClient('https://moneypoolapp.onrender.com');

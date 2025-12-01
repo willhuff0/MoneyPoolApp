@@ -70,7 +70,12 @@ export default function SpecificPool() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.poolName}>{pool.displayName}</Text>
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+          <Text style={styles.poolName}>{pool.displayName}</Text>
+          <Pressable onPress={() => router.replace("/(root)/poolslist")} style={{ padding: 8 }}>
+            <Text style={{ color: "#1428A0", fontWeight: "600" }}>Back</Text>
+          </Pressable>
+        </View>
         <View style={styles.totalBox}>
           <Text style={styles.totalLabel}>Total</Text>
           <Text style={styles.totalAmount}>${pool.balance?.toFixed(2) || "0.00"}</Text>

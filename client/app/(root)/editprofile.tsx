@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { Alert, Pressable, Text, TextInput, View, StyleSheet, ScrollView } from "react-native";
+import { useRouter } from "expo-router";
 //For connecting to API 
 import { useApi } from "@/api/api-provider";
 
 export default function EditProfile() {
+  const router = useRouter();
   const api = useApi();
   const user = api.activeUser
   const [displayName, setDisplayName] = useState(api.activeUser?.displayName || "");
@@ -13,7 +15,12 @@ export default function EditProfile() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.section}>
-        <Text style={{fontSize: 24,fontWeight: "bold",marginBottom: 16,}}>Edit Profile</Text>
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+          <Text style={{fontSize: 24,fontWeight: "bold"}}>Edit Profile</Text>
+          <Pressable onPress={() => router.replace("/(root)/profile")} style={{ padding: 8 }}>
+            <Text style={{ color: "#1428A0", fontWeight: "600" }}>Back</Text>
+          </Pressable>
+        </View>
         <Text style={styles.sectionTitle}>Display Name</Text>
         <TextInput
           placeholder="Enter New Display Name"

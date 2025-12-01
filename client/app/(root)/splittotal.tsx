@@ -3,7 +3,7 @@ import { splitBalance } from "@/utils/split-balance";
 import { Pool } from "@money-pool-app/shared";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Pressable } from "react-native";
 
 export default function SplitTotal() {
     const router = useRouter();
@@ -75,7 +75,12 @@ export default function SplitTotal() {
     return (
         <View style={styles.container}>
             <View style={styles.header}>
-                <Text style={styles.poolName}>{pool.displayName}</Text>
+                <View style={{ width: "100%", flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                    <Text style={styles.poolName}>{pool.displayName}</Text>
+                    <Pressable onPress={() => router.replace(`/(root)/specificpool?poolId=${poolId}`)} style={{ padding: 8 }}>
+                        <Text style={{ color: "#1428A0", fontWeight: "600" }}>Back</Text>
+                    </Pressable>
+                </View>
                 <Text style={styles.subtitle}>
                     Splitting the total balance evenly among members.
                 </Text>

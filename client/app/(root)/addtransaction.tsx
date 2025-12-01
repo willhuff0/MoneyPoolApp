@@ -53,7 +53,12 @@ export default function AddTransaction() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Add Transaction</Text>
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+          <Text style={styles.sectionTitle}>Add Transaction</Text>
+          <Pressable onPress={() => router.replace(`/(root)/specificpool?poolId=${poolId}`)} style={{ padding: 8 }}>
+            <Text style={{ color: "#1428A0", fontWeight: "600" }}>Back</Text>
+          </Pressable>
+        </View>
 
         <Text style={styles.label}>Purpose of Transaction</Text>
         <TextInput

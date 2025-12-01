@@ -176,7 +176,7 @@ useEffect(() => {
   }
 
   function handleGoBack() {
-    router.push(`/(root)/specificpool?poolId=${poolId}`);
+    router.replace(`/(root)/specificpool?poolId=${poolId}`);
   }
 
   if (isLoading) {

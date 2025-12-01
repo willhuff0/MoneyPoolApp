@@ -36,7 +36,12 @@ export default function CreatePool() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Create Pool</Text>
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+          <Text style={styles.sectionTitle}>Create Pool</Text>
+          <Pressable onPress={() => router.replace("/(root)/poolslist")} style={{ padding: 8 }}>
+            <Text style={{ color: "#1428A0", fontWeight: "600" }}>Back</Text>
+          </Pressable>
+        </View>
 
         <Text style={styles.label}>Pool name</Text>
         <TextInput style={styles.input} value={name} onChangeText={setName} placeholder="e.g. Weekend Trip" />

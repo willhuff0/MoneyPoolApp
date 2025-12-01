@@ -1,41 +1,44 @@
 // client/app/(auth)/signup.tsx
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { Alert, Pressable, Text, TextInput, View } from "react-native";
+import { Pressable, Text, TextInput, View } from "react-native";
 import AuthBg from "../../components/AuthBg";
 import AuthCard from "../../components/AuthCard";
 import { useApi } from "@/api/api-provider";
 import { validateDisplayName, validateEmail, validatePassword, validateUserName } from "@money-pool-app/shared";
+import { useAlert } from "@/components/ui/custom-alert";
 
 export default function SignupScreen() {
   const api = useApi();
+  const { showAlert } = useAlert();
+  const params = useLocalSearchParams<{ email?: string; userName?: string }>();
 
   const [displayName, setDisplayName] = useState("");
-  const [userName, setUserName] = useState("");
-  const [email, setEmail] = useState("");
+  const [userName, setUserName] = useState(params.userName || "");
+  const [email, setEmail] = useState(params.email || "");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
 
   const onSignup = async () => {
     if (!displayName.trim() || !userName.trim() || !email.trim() || !password.trim()) {
-      Alert.alert("Missing info", "Please complete all fields.");
+      showAlert("Missing info", "Please complete all fields.");
       return;
     }
 
     if (!validateDisplayName(displayName.trim())) {
-      Alert.alert("Invalid info", "Display Name is invalid.");
+      showAlert("Invalid info", "Display Name is invalid.");
       return;
     }
     if (!validateUserName(userName.trim())) {
-      Alert.alert("Invalid info", "Username is invalid.");
+      showAlert("Invalid info", "Username is invalid.");
       return;
     }
     if (!validateEmail(email.trim())) {
-      Alert.alert("Invalid info", "Email is invalid.");
+      showAlert("Invalid info", "Email is invalid.");
       return;
     }
     if (!validatePassword(password.trim())) {
-      Alert.alert("Invalid info", "Password is invalid.");
+      showAlert("Invalid info", "Password is invalid.");
       return;
     }
 
@@ -43,10 +46,9 @@ export default function SignupScreen() {
       setBusy(true);
       if (await api.signUp({ displayName: displayName.trim(), userName: userName.trim(), email: email.trim(), password })) {
         // Token stored automatically by api.ts if backend returns it
-        Alert.alert("Success", "Account created!");
         router.replace("/(root)/homepage");
       } else {
-        Alert.alert("Signup failed");
+        showAlert("Signup failed");
       }
     } finally {
       setBusy(false);
@@ -62,6 +64,7 @@ export default function SignupScreen() {
           <Text>Display Name</Text>
           <TextInput
             placeholder="Your Name"
+            placeholderTextColor="#888"
             autoCapitalize="words"
             value={displayName}
             onChangeText={setDisplayName}
@@ -71,6 +74,7 @@ export default function SignupScreen() {
           <Text>Username</Text>
           <TextInput
             placeholder="your_username"
+            placeholderTextColor="#888"
             autoCapitalize="none"
             value={userName}
             onChangeText={setUserName}
@@ -80,6 +84,7 @@ export default function SignupScreen() {
           <Text>Email</Text>
           <TextInput
             placeholder="you@ufl.edu"
+            placeholderTextColor="#888"
             keyboardType="email-address"
             autoCapitalize="none"
             autoCorrect={false}
@@ -91,6 +96,7 @@ export default function SignupScreen() {
           <Text>Password</Text>
           <TextInput
             placeholder="••••••••"
+            placeholderTextColor="#888"
             secureTextEntry
             autoCapitalize="none"
             value={password}

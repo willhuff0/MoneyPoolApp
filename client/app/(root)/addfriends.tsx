@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Alert, Pressable, Text, TextInput, View, StyleSheet, ScrollView } from "react-native";
+import { Pressable, Text, TextInput, View, StyleSheet, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
 //For connecting to API 
 import { useSdk } from "@/api/api-provider";
@@ -60,6 +60,7 @@ export default function AddFriendsScreen() {
 
         <TextInput
           placeholder="username"
+          placeholderTextColor="#888"
           autoCapitalize="none"
           value={query}
           onChangeText={setQuery}

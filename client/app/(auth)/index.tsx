@@ -1,32 +1,40 @@
 // client/app/(auth)/index.tsx
 import { router } from "expo-router";
 import { useState } from "react";
-import { Alert, Pressable, Text, TextInput, View } from "react-native";
+import { Pressable, Text, TextInput, View } from "react-native";
 import AuthBg from "../../components/AuthBg";
 import AuthCard from "../../components/AuthCard";
 import { normalizeUsername } from "../../utils/ident";
 import { useApi } from "@/api/api-provider";
-import { validateEmail } from "@money-pool-app/shared";
+import { validateEmail, validateUserName } from "@money-pool-app/shared";
+import { useAlert } from "@/components/ui/custom-alert";
 
 export default function IdentifierScreen() {
   const api = useApi();
+  const { showAlert } = useAlert();
 
   const [id, setId] = useState("");
   const [busy, setBusy] = useState(false);
   const trimmed = id.trim();
+  const isValid = trimmed.length > 0 && (validateEmail(trimmed) || validateUserName(trimmed));
 
   const onContinue = async () => {
     if (!trimmed) {
-      Alert.alert("Missing info", "Enter your email or username.");
+      showAlert("Missing info", "Enter your email or username.");
       return;
     }
+    
     const usesEmail = validateEmail(trimmed);
+    if (!usesEmail && !validateUserName(trimmed)) {
+      showAlert("Invalid info", "Please enter a valid email or username.");
+      return;
+    }
+
     const identifier = usesEmail ? trimmed : normalizeUsername(trimmed);
     setBusy(true);
     try {
       const exists = await api.doesUserExist({
-        ...(usesEmail ? { email: identifier } : {}),
-        ...(!usesEmail ? { userName: identifier } : {}),
+        ...(usesEmail ? { email: identifier } : { userName: identifier }),
       });
 
       if (exists) {
@@ -39,11 +47,12 @@ export default function IdentifierScreen() {
         // Go to sign up screen; it will perform the actual sign up API call.
         router.push({
           pathname: "/(auth)/signup",
+          params: usesEmail ? { email: identifier } : { userName: identifier },
         });
       }
-    } catch (e) {
+    } catch (_e) {
       //Because of network or server error 
-      Alert.alert("Network error", "Please try again.");
+      showAlert("Network error", "Please try again.");
     } finally {
       setBusy(false);
     }
@@ -59,6 +68,7 @@ export default function IdentifierScreen() {
           <Text style={{ marginTop: 6 }}>Email or Username</Text>
           <TextInput
             placeholder="you@ufl.edu or your_username"
+            placeholderTextColor="#888"
             autoCapitalize="none"
             autoCorrect={false}
             keyboardType="default"
@@ -69,9 +79,9 @@ export default function IdentifierScreen() {
 
           <Pressable
             onPress={onContinue}
-            disabled={busy}
+            disabled={busy || !isValid}
             style={{
-              backgroundColor: busy ? "#94a3b8" : "#1428A0",
+              backgroundColor: (busy || !isValid) ? "#94a3b8" : "#1428A0",
               padding: 14,
               borderRadius: 10,
               alignItems: "center",

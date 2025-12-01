@@ -1,13 +1,15 @@
 import React, { useState } from "react";
-import { ScrollView, View, Text, TextInput, Pressable, StyleSheet, Alert } from "react-native";
+import { ScrollView, View, Text, TextInput, Pressable, StyleSheet } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useApi, useSdk } from "@/api/api-provider";
+import { useAlert } from "@/components/ui/custom-alert";
 
 export default function AddTransaction() {
   const router = useRouter();
   const { poolId } = useLocalSearchParams();
   const sdk = useSdk();
   const { refreshUser } = useApi();
+  const { showAlert } = useAlert();
   
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
@@ -17,12 +19,12 @@ export default function AddTransaction() {
     const parsedAmount = parseFloat(amount);
     
     if (!description.trim()) {
-      Alert.alert("Error", "Please enter a description");
+      showAlert("Error", "Please enter a description");
       return;
     }
     
     if (isNaN(parsedAmount) || parsedAmount <= 0) {
-      Alert.alert("Error", "Please enter a valid amount");
+      showAlert("Error", "Please enter a valid amount");
       return;
     }
 
@@ -38,12 +40,12 @@ export default function AddTransaction() {
         router.replace(`/(root)/specificpool?poolId=${poolId}`);
         refreshUser();
       } else {
-        Alert.alert("Error", "Failed to add transaction");
+        showAlert("Error", "Failed to add transaction");
         setSaving(false);
       }
     } catch (e) {
       console.error("Error adding transaction:", e);
-      Alert.alert("Error", "Failed to add transaction");
+      showAlert("Error", "Failed to add transaction");
       setSaving(false);
     }
   }
@@ -65,6 +67,7 @@ export default function AddTransaction() {
         <Text style={styles.label}>Purpose of Transaction</Text>
         <TextInput
           style={styles.input}
+          placeholderTextColor="#888"
           placeholder="e.g. Bought gas"
           value={description}
           onChangeText={setDescription}
@@ -74,6 +77,7 @@ export default function AddTransaction() {
         <Text style={[styles.label, { marginTop: 12 }]}>Amount</Text>
         <TextInput
           style={styles.input}
+          placeholderTextColor="#888"
           placeholder="$0.00"
           value={amount}
           onChangeText={setAmount}

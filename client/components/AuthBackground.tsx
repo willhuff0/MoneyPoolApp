@@ -3,7 +3,7 @@
 
 //For demo purposes running without image in background 
 import { ReactNode } from "react";
-import { Platform, Text, View } from "react-native";
+import { Platform, Text, View, Image } from "react-native";
 
 export default function AuthBackground({
   title = "Chomp Change",
@@ -13,6 +13,12 @@ export default function AuthBackground({
     <View style={{ flex: 1, backgroundColor: "#0A2463" }}>
       <View style={{ paddingTop: Platform.select({ web: 40, default: 20 }), paddingBottom: 16, alignItems: "center" }}>
         <Text style={{ fontSize: 28, fontWeight: "700", color: "white" }}>{title}</Text>
+      </View>
+      <View style={{ alignItems: "center" }}>
+          <Image
+          source={require("../../assets/CCLogo1.png")}
+          style={{ width: 200, height: 200, resizeMode: "contain" }}
+          />
       </View>
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center", padding: 24 }}>
         <View style={{ width: "100%", maxWidth: 420 }}>{children}</View>

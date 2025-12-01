@@ -1,4 +1,5 @@
 import { ApiProvider, useApi } from "@/api/api-provider";
+import { AlertProvider } from "@/components/ui/custom-alert";
 import { Stack, Redirect, usePathname } from "expo-router";
 
 function LoggedInSwitcher() {
@@ -14,11 +15,13 @@ function LoggedInSwitcher() {
 export default function AppLayout() {
   return (
     <ApiProvider>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(auth)" />
-        <Stack.Screen name="(root)" />
-      </Stack>
-      <LoggedInSwitcher />
+      <AlertProvider>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(auth)" />
+          <Stack.Screen name="(root)" />
+        </Stack>
+        <LoggedInSwitcher />
+      </AlertProvider>
     </ApiProvider>
   )
 }

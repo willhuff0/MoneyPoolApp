@@ -44,6 +44,7 @@ export default function SignupScreen() {
       if (await api.signUp({ displayName: displayName.trim(), userName: userName.trim(), email: email.trim(), password })) {
         // Token stored automatically by api.ts if backend returns it
         Alert.alert("Success", "Account created!");
+        router.replace("/(root)/homepage");
       } else {
         Alert.alert("Signup failed");
       }

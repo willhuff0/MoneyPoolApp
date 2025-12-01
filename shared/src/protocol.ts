@@ -47,6 +47,9 @@ export interface AuthSignInResponse {
         userName: string,
         displayName: string,
         chompScore: number,
+        pools: string[],
+        friends: string[],
+        incomingFriendRequests: string[],
     },
 }
 
@@ -84,6 +87,9 @@ export interface UserGetSelfUserResponse {
         userName: string,
         displayName: string,
         chompScore: number,
+        pools: string[],
+        friends: string[],
+        incomingFriendRequests: string[],
     },
 }
 
@@ -123,12 +129,12 @@ export interface UserDeleteFriendRequestRequest {
 
 //#region Pool
 
-export const poolGetPoolEndpoint = '/pool/getPool';
-export interface PoolGetPoolRequest {
-    poolId: string,
+export const poolGetPoolsEndpoint = '/pool/getPools';
+export interface PoolGetPoolsRequest {
+    poolIds: string[],
 }
-export interface PoolGetPoolResponse {
-    pool: Pool,
+export interface PoolGetPoolsResponse {
+    pools: Pool[],
 }
 
 export const poolCreatePoolEndpoint = '/pool/createPool';

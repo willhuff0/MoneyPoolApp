@@ -40,6 +40,7 @@ export default function PasswordScreen() {
       if (await api.signIn(payload)) {
         // Token saved automatically
         Alert.alert("Welcome!", `Logged in as ${api.activeUser?.displayName}`);
+        router.replace("/(root)/homepage");
       } else {
         Alert.alert("Login failed", "Password is incorrect.");
       }

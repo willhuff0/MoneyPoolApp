@@ -2,72 +2,48 @@ import React, { useState, useEffect } from "react";
 import { ScrollView, View, Text, StyleSheet, Pressable } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSdk, useApi } from "@/api/api-provider";
+import { Pool } from "@money-pool-app/shared";
+import { TransactionList } from "@/components/transaction-list";
 
 export default function SpecificPool() {
   const router = useRouter();
   const { poolId } = useLocalSearchParams();
-  const sdk = useSdk();
   const { activeUser } = useApi();
+  const sdk = useSdk();
   
-  const [pool, setPool] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
-  //For testing: set true for owner and false for member
-  const [isOwner, setIsOwner] = useState(true);
+  const [pool, setPool] = useState<Pool | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<unknown>(null);
+
+  const [isOwner, setIsOwner] = useState(false);
   const [transactions, setTransactions] = useState<any[]>([]);
   const [splitMessages, setSplitMessages] = useState<any[]>([]);
 
   useEffect(() => {
-    setPool({
-      poolId: "mock-pool-1",
-      displayName: "Test Trip",
-      ownerUserId: activeUser?.userId,
-      members: ["user1", "user2"],
-      balance: 420.69,
-    });
+    const fetchData = async () => {
+      try {
+        if (!poolId || typeof poolId !== 'string') return;
+        const pools = await sdk.pool.getPools([poolId as string]);
+        setPool(pools.at(0) ?? null);
+        setIsOwner(pools.at(0)?.ownerUserId === activeUser!.userId);
+      } catch (error) {
+        setError(error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
+    fetchData();
     setTransactions([
       { transactionId: "1", description: "Dinner at restaurant", amount: 45.50, userId: "user1", userName: "Alice" },
       { transactionId: "2", description: "Gas for road trip", amount: 32.00, userId: "user2", userName: "Bob" },
     ]);
-    
-    // loadPool();
-    // loadTransactions();
   }, [poolId]);
-
-  async function loadPool() {
-    if (!poolId || typeof poolId !== 'string') return;
-    
-    setLoading(true);
-    try {
-      const poolData = await sdk.pool.getPool(poolId);
-      if (poolData) {
-        setPool(poolData);
-        setIsOwner(poolData.ownerUserId === activeUser?.userId);
-      }
-    } catch (e) {
-      console.error("Error loading pool:", e);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function loadTransactions() {
-    if (!poolId || typeof poolId !== 'string') return;
-    
-    try {
-      const data = await sdk.transaction.getTransactions(poolId);
-      if (data) {
-        setTransactions(data);
-      }
-    } catch (e) {
-      console.error("Error loading transactions:", e);
-    }
-  }
 
   function onSplitTotal() {
     if (!pool || !pool.balance) return;
     
-    const memberCount = pool.members?.length || 0;
+    const memberCount = pool.members.keys.length || 0;
     if (memberCount === 0) {
       alert("No members in pool");
       return;
@@ -100,7 +76,7 @@ export default function SpecificPool() {
     router.push(`/(root)/addtransaction?poolId=${poolId}`);
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
       <View style={styles.container}>
         <Text>Loading...</Text>
@@ -146,7 +122,8 @@ export default function SpecificPool() {
       )}
 
       {/* Transactions and Split Messages Feed */}
-      <ScrollView style={styles.transactionsFeed} contentContainerStyle={styles.transactionsContent}>
+      <TransactionList poolId={pool.poolId}></TransactionList>
+      {/* <ScrollView style={styles.transactionsFeed} contentContainerStyle={styles.transactionsContent}>
         {transactions.length === 0 && splitMessages.length === 0 ? (
           <View style={styles.emptyState}>
             <Text style={styles.emptyText}>No transactions yet</Text>
@@ -168,7 +145,7 @@ export default function SpecificPool() {
             ))}
           </>
         )}
-      </ScrollView>
+      </ScrollView> */}
 
       {/* Add Transaction Button */}
       <View style={styles.footer}>

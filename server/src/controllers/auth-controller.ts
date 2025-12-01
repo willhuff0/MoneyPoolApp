@@ -176,6 +176,7 @@ export class AuthController {
                 userName: dbUser.userName,
                 displayName: dbUser.displayName,
                 chompScore: dbUser.chompScore,
+                pools: dbUser.pools,
             }
         } as Protocol.AuthSignInResponse);
     }

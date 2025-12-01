@@ -1,60 +1,85 @@
-import React, { useState } from "react";
-import { ScrollView, View, Text, StyleSheet, Pressable, Alert } from "react-native";
+import React, { useEffect, useState } from "react";
+import { ScrollView, View, Text, StyleSheet, Pressable } from "react-native";
 import { useRouter } from "expo-router";
-import { useSdk } from "@/api/api-provider";
+import { useApi, useSdk } from "@/api/api-provider";
+import { Pool } from "@money-pool-app/shared";
 
 export default function PoolsIndex() {
   const router = useRouter();
+  const { activeUser } = useApi();
   const sdk = useSdk();
-  // Mock pool data for testing
-  const [pools, setPools] = useState<Array<{ id: string; name: string; balance: number }>>([
-    { id: "pool-1", name: "Weekend Trip", balance: 123.45 },
-    { id: "pool-2", name: "Office Lunch Fund", balance: 87.50 },
-  ]);
-  const [loading, setLoading] = useState(false);
+
+  const [pools, setPools] = useState<Pool[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<unknown>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (activeUser!.pools.length === 0) return;
+        const pools = await sdk.pool.getPools(activeUser!.pools);
+        setPools(pools);
+      } catch (error) {
+        setError(error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const onCreatePool = () => {
     //Go to create pool page
     router.push("/(root)/create");
   };
 
-  return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.section}>
-        <View style={styles.headerRow}>
-          <Text style={styles.sectionTitle}>My Pools</Text>
-          <Pressable style={styles.createButton} onPress={onCreatePool}>
-            <Text style={styles.createButtonText}>Create Pool</Text>
-          </Pressable>
-        </View>
+  if (isLoading) {
+    return (
+      <Text style={styles.emptyText}>Loading...</Text>
+    );
+  } else if (error != null) {
+    return (
+      <Text style={styles.emptyText}>Error: {String(error)}</Text>
+    );
+  } else {
+    return (
+      <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.section}>
+          <View style={styles.headerRow}>
+            <Text style={styles.sectionTitle}>My Pools</Text>
+            <Pressable style={styles.createButton} onPress={onCreatePool}>
+              <Text style={styles.createButtonText}>Create Pool</Text>
+            </Pressable>
+          </View>
 
-        <View style={styles.list}>
-          {pools.length === 0 ? (
-            <View style={styles.emptyState}>
-              <Text style={styles.emptyText}>No pools yet</Text>
-              <Text style={styles.emptySubtext}>Create a pool to get started</Text>
-            </View>
-          ) : (
-            pools.map((p) => (
-              <Pressable
-                key={p.id}
-                style={styles.poolItem}
-                onPress={() => {
-                  //Placeholder for navigating to specific pool page
-                  router.push(`/(root)/specificpool?poolId=${p.id}`);
-                }}
-              >
-                <View>
-                  <Text style={styles.poolName}>{p.name}</Text>
-                  <Text style={styles.poolBalance}>${p.balance.toFixed(2)}</Text>
-                </View>
-              </Pressable>
-            ))
-          )}
+          <View style={styles.list}>
+            {pools.length === 0 ? (
+              <View style={styles.emptyState}>
+                <Text style={styles.emptyText}>No pools yet</Text>
+                <Text style={styles.emptySubtext}>Create a pool to get started</Text>
+              </View>
+            ) : (
+              pools.map((p) => (
+                <Pressable
+                  key={p.poolId}
+                  style={styles.poolItem}
+                  onPress={() => {
+                    router.push(`/(root)/specificpool?poolId=${p.poolId}`);
+                  }}
+                >
+                  <View>
+                    <Text style={styles.poolName}>{p.displayName}</Text>
+                    <Text style={styles.poolBalance}>${p.balance.toFixed(2)}</Text>
+                  </View>
+                </Pressable>
+              ))
+            )}
+          </View>
         </View>
-      </View>
-    </ScrollView>
-  );
+      </ScrollView>
+    );
+  }
 }
 
 //Stylesheet cohesive with homepage, reusing container, section, and sectionTitle styles

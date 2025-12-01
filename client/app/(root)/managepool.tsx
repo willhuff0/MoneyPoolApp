@@ -14,7 +14,7 @@ export default function ManagePool() {
   const [memberDetails, setMemberDetails] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   //For testing: set true for owner, false for member 
-  const [isOwner, setIsOwner] = useState(false);
+  const [isOwner, setIsOwner] = useState(true);
   const [addUsername, setAddUsername] = useState("");
   const [removeUsername, setRemoveUsername] = useState("");
   const [addingMember, setAddingMember] = useState(false);
@@ -25,8 +25,8 @@ export default function ManagePool() {
     const mockPool = {
       poolId: "mock-pool-1",
       displayName: "Weekend Trip",
-    //   ownerUserId: activeUser?.userId,
-      ownerUserId: "user1",
+      ownerUserId: activeUser?.userId,
+      // ownerUserId: "user1",
       members: { "user1": 0, "user2": 0, "user3": 0 },
       balance: 0,
     };

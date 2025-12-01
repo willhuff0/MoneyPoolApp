@@ -21,7 +21,7 @@ export default function CreatePool() {
       const poolId = await sdk.pool.createPool(trimmedName);
       if (poolId) {
         Alert.alert("Success", `Pool '${trimmedName}' created!`);
-        router.replace("/(root)/poolslist");
+        router.push("/(root)/poolslist");
       } else {
         Alert.alert("Error", "Failed to create pool");
       }
@@ -48,7 +48,7 @@ export default function CreatePool() {
           <Pressable style={[styles.button, creating && { backgroundColor: "#94a3b8" }]} onPress={onCreate} disabled={creating}>
             <Text style={styles.buttonText}>{creating ? "Creating Pool..." : "Create"}</Text>
           </Pressable>
-          <Pressable style={styles.cancelButton} onPress={() => router.back()} disabled={creating}>
+          <Pressable style={styles.cancelButton} onPress={() => router.push("/(root)/poolslist")} disabled={creating}>
             <Text style={styles.cancelButtonText}>Cancel</Text>
           </Pressable>
         </View>

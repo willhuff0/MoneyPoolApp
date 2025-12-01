@@ -8,6 +8,11 @@ export default function Settings() {
   const api = useApi();
   const userName = api.activeUser?.userName || "Username";
 
+  async function handleLogout() {
+    await api.signOut();
+    router.replace("/(auth)");
+  }
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
         {/* Account Info*/}
@@ -21,16 +26,15 @@ export default function Settings() {
                 <Text style={{ fontSize: 16, textAlign: "left" }}>
                   {api.activeUser?.email || "No email available"}
                 </Text>
-                <View style={{ display: "flex", flexDirection: "row", alignItems: "center" , gap: 12 }}>
-                  <Pressable style={styles.addButton} onPress={() => router.push("/(root)/editprofile")}>
-                    <Text style={styles.addButtonText}>Edit Profile</Text>
-                  </Pressable>
-                  <Pressable style={styles.addButton} onPress={() => api.signOut()}>
-                    <Text style={styles.addButtonText}>Log Out</Text>
-                  </Pressable>
-                </View>
+                <Pressable style={styles.addButton} onPress={() => router.push("/(root)/editprofile")}>
+                  <Text style={styles.addButtonText}>Edit Profile</Text>
+                </Pressable>
             </View>
           </View>
+
+          <Pressable style={styles.logoutButton} onPress={handleLogout}>
+            <Text style={styles.logoutButtonText}>Log Out</Text>
+          </Pressable>
         </View>
       </ScrollView>
   );
@@ -96,7 +100,7 @@ const styles = StyleSheet.create({
     color: "#888",
     fontStyle: "italic",
   },
-  addButton: {
+    addButton: {
       backgroundColor: "#1428A0",
       paddingVertical: 6,
       paddingHorizontal: 12,
@@ -107,6 +111,18 @@ const styles = StyleSheet.create({
       fontWeight: "600",
       fontSize: 14,
     },
+  logoutButton: {
+    backgroundColor: "#1428A0",
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 16,
+  },
+  logoutButtonText: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 16,
+  },
   emptyState: {
     alignItems: "center",
     justifyContent: "center",

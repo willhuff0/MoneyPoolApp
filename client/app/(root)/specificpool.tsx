@@ -12,7 +12,7 @@ export default function SpecificPool() {
   const [pool, setPool] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   //For testing: set true for owner and false for member
-  const [isOwner, setIsOwner] = useState(false);
+  const [isOwner, setIsOwner] = useState(true);
   const [transactions, setTransactions] = useState<any[]>([]);
   const [splitMessages, setSplitMessages] = useState<any[]>([]);
 

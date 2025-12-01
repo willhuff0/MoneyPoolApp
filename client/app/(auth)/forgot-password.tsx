@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Alert, Pressable, Text, TextInput, View } from "react-native";
 import AuthBg from "../../components/AuthBg";
 import AuthCard from "../../components/AuthCard";
-import { isEmail } from "../../utils/ident";
+import { validateEmail } from "@money-pool-app/shared";
 
 export default function ForgotPasswordScreen() {
   //Have pre-filled email 
@@ -12,14 +12,14 @@ export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState("");
 
   useEffect(() => {
-    if (type === "email" && typeof value === "string" && isEmail(value)) {
+    if (type === "email" && typeof value === "string" && validateEmail(value)) {
       setEmail(value);
     }
   }, [type, value]);
 
   const onSubmit = async () => {
     const trimmed = email.trim();
-    if (!trimmed || !isEmail(trimmed)) {
+    if (!trimmed || !validateEmail(trimmed)) {
       Alert.alert("Enter a valid email");
       return;
     }

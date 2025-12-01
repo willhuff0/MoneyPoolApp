@@ -40,7 +40,6 @@ export default function PasswordScreen() {
       if (await api.signIn(payload)) {
         // Token saved automatically
         Alert.alert("Welcome!", `Logged in as ${api.activeUser?.displayName}`);
-        router.replace("/"); 
       } else {
         Alert.alert("Login failed", "Password is incorrect.");
       }
@@ -86,17 +85,7 @@ export default function PasswordScreen() {
             </Text>
           </Pressable>
 
-          <Pressable
-            onPress={() =>
-              router.push({
-                pathname: "/(auth)/forgot-password",
-                params: { type, value },
-              })
-            }
-            style={{ alignItems: "center", padding: 8 }}
-          >
-            <Text style={{ color: "#1428A0" }}>Forgot your password?</Text>
-          </Pressable>
+
 
           <Pressable onPress={() => router.back()} style={{ alignItems: "center", padding: 8 }}>
             <Text style={{ color: "#1428A0" }}>Back</Text>

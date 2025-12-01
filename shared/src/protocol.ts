@@ -72,10 +72,26 @@ export interface AuthInvalidateTokensRequest {
 
 export const userGetUserEndpoint = '/user/getUser';
 export interface UserGetUserRequest {
-    userId: string,
+    userId?: string,
 }
 export interface UserGetUserResponse {
     user: User,
+}
+export interface UserGetSelfUserResponse {
+    user: {
+        userId: string,
+        email: string,
+        userName: string,
+        displayName: string,
+        chompScore: number,
+    },
+}
+
+export const userEditUserEndpoint = '/user/editUser';
+export interface UserEditUserRequest {
+    newDisplayName?: string,
+    newEmail?: string,
+    newPassword?: string,
 }
 
 export const userSearchUserEndpoint = '/user/searchUser';

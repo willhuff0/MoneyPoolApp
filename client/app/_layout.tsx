@@ -1,41 +1,35 @@
-import { Stack, router } from "expo-router";
-import { useEffect, useState } from "react";
+import { ApiProvider, useApi } from "@/api/api-provider";
+import { Stack, Redirect } from "expo-router";
 
-export default function RootLayout() {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+function LoggedInSwitcher() {
+  const api = useApi();
 
-  useEffect(() => {
-    checkAuthStatus();
-  }, []);
-
-  const checkAuthStatus = async () => {
-    try {
-      // TESTING: Skip auth check - always show root layout
-      setIsLoggedIn(true);
-      router.replace("/(root)/homepage");
-      // const token = await AsyncStorage.getItem("sessionToken");
-      // setIsLoggedIn(!!token);
-      // 
-      // // Navigate based on auth status
-      // if (!token) {
-      //   router.replace("/(auth)");
-      // }
-    } catch (error) {
-      console.error("Error checking auth:", error);
-      setIsLoggedIn(false);
-      router.replace("/(auth)");
-    }
-  };
-
-  // Loading state - show nothing while checking
-  if (isLoggedIn === null) {
-    return null;
+  if (!api.ready) {
+    return null; // Or a loading screen
   }
 
-  return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(auth)" />
-      <Stack.Screen name="(root)" />
-    </Stack>
-  );
+  if (api.activeUser == null) {
+    return <Redirect href="/(auth)" />;
+  } else {
+    return <Redirect href="/(root)/homepage" />;
+  }
 }
+
+export default function AppLayout() {
+  return (
+    <ApiProvider>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(auth)" />
+        <Stack.Screen name="(root)" />
+      </Stack>
+      <LoggedInSwitcher />
+    </ApiProvider>
+  )
+}
+
+//Flow: 
+//Launch to homepage if logged in 
+//Else go to auth screens 
+//From homepage can navigate to add friends page
+//Navigation bar for homepage, pools list, and settings
+//From pools list -> specific pool view, create pool, manage pool

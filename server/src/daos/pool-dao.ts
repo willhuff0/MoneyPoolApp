@@ -1,11 +1,11 @@
-import { mongo } from "mongoose";
+import { Mongoose } from "mongoose";
 import { PoolModel, PoolDocument } from "../models"
 
 export class PoolDao {
-    session: mongo.ClientSession;
+    db: Mongoose;
 
-    constructor(session: mongo.ClientSession) {
-        this.session = session;
+    constructor(db: Mongoose) {
+        this.db = db;
     }
 
     public readonly createPool = async (poolId: string, name: string, owner: string): Promise<void> => {
@@ -25,39 +25,54 @@ export class PoolDao {
     }
 
     public readonly addMember = async (checkOwnerId: string, poolId: string, userId: string): Promise<boolean> => {
-        return await this.session.withTransaction(async () => {
-            const pool = await PoolModel.findById(poolId);
-            if (pool == null) return false;
-            if (pool.owner !== checkOwnerId) return false;
+        const session = await this.db.startSession();
+        try {
+            return await session.withTransaction(async () => {
+                const pool = await PoolModel.findById(poolId, { session });
+                if (pool == null) return false;
+                if (pool.owner !== checkOwnerId) return false;
 
-            await pool.updateOne(
-                { $addToSet: { members: userId } },
-            );
-            return true;
-        });
+                await pool.updateOne({
+                    $addToSet: { members: userId }
+                }, { session });
+                return true;
+            });
+        } finally {
+            await session.endSession();
+        }
     }
 
     public readonly removeMember = async (checkOwnerId: string, poolId: string, userId: string): Promise<boolean> => {
-        return await this.session.withTransaction(async () => {
-            const pool = await PoolModel.findById(poolId);
-            if (pool == null) return false;
-            if (pool.owner !== checkOwnerId) return false;
+        const session = await this.db.startSession();
+        try {
+            return await session.withTransaction(async () => {
+                const pool = await PoolModel.findById(poolId, { session });
+                if (pool == null) return false;
+                if (pool.owner !== checkOwnerId) return false;
 
-            await pool.updateOne(
-                { $pull: { members: userId } },
-            );
-            return true;
-        });
+                await pool.updateOne({
+                    $pull: { members: userId }
+                }, { session });
+                return true;
+            });
+        } finally {
+            await session.endSession();
+        }
     }
 
     public readonly deletePool = async (checkOwnerId: string, poolId: string): Promise<boolean> => {
-        return await this.session.withTransaction(async () => {
-            const pool = await PoolModel.findById(poolId);
-            if (pool == null) return false;
-            if (pool.owner !== checkOwnerId) return false;
+        const session = await this.db.startSession();
+        try {
+            return await session.withTransaction(async () => {
+                const pool = await PoolModel.findById(poolId, { session });
+                if (pool == null) return false;
+                if (pool.owner !== checkOwnerId) return false;
 
-            await pool.deleteOne();
-            return true;
-        });
+                await pool.deleteOne({ session });
+                return true;
+            });
+        } finally {
+            await session.endSession();
+        }
     }
 }

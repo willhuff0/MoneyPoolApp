@@ -42,10 +42,8 @@ export default function SignupScreen() {
     try {
       setBusy(true);
       if (await api.signUp({ displayName: displayName.trim(), userName: userName.trim(), email: email.trim(), password })) {
-        // Navigate back to sign in page
-        Alert.alert("Account created!");
-        await router.replace("/(auth)");
-        return;
+        // Token stored automatically by api.ts if backend returns it
+        Alert.alert("Success", "Account created!");
       } else {
         Alert.alert("Signup failed");
       }

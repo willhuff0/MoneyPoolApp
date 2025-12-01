@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { apiClient } from './client';
-import { loadTokens, saveTokens, clearTokens } from './tokens';
-import { authCreateUserEndpoint, AuthCreateUserRequest, AuthCreateUserResponse, authDoesUserExistEndpoint, AuthDoesUserExistRequest, AuthDoesUserExistResponse, authInvalidateTokensEndpoint, AuthInvalidateTokensRequest, authSignInEndpoint, AuthSignInRequest, AuthSignInResponse } from '@money-pool-app/shared';
+import { loadTokens, saveTokens, clearTokens, getRefreshToken } from './tokens';
+import { authCreateUserEndpoint, AuthCreateUserRequest, AuthCreateUserResponse, authDoesUserExistEndpoint, AuthDoesUserExistRequest, AuthDoesUserExistResponse, authInvalidateTokensEndpoint, AuthInvalidateTokensRequest, authSignInEndpoint, AuthSignInRequest, AuthSignInResponse, UserGetSelfUserResponse, userGetUserEndpoint, UserGetUserResponse } from '@money-pool-app/shared';
 import { createApiSdk, Sdk } from './sdk';
 import axios from 'axios';
 
@@ -34,7 +34,28 @@ export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
     useEffect(() => {
         (async () => {
             await loadTokens();
-            setReady(true);
+            if (getRefreshToken() == undefined) {
+                setReady(true);
+                return;
+            }
+            try {
+                const response = await apiClient.get<UserGetSelfUserResponse>(userGetUserEndpoint);
+                if (response.status === 200) {
+                    const { user } = response.data;
+                    setActiveUser({
+                        userId: user.userId,
+                        userName: user.userName,
+                        email: user.email,
+                        displayName: user.displayName,
+                        chompScore: user.chompScore,
+                    });
+                }
+            } catch (error) {
+                console.log(`Not logged in or session expired: ${error}`);
+                await clearTokens();
+            } finally {
+                setReady(true);
+            }
         })();
     }, []);
 
@@ -45,7 +66,7 @@ export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
         doesUserExist: async (request) => {
             try {
                 const response = await axios.post<AuthDoesUserExistResponse>(`${apiClient.defaults.baseURL}${authDoesUserExistEndpoint}`, request);
-                if (response.status != 200) return false;
+                if (response.status !== 200) return false;
 
                 return response.data.userExists;
             } catch (error) {
@@ -56,7 +77,7 @@ export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
         signIn: async (request) => {
             try {
                 const response = await axios.post<AuthSignInResponse>(`${apiClient.defaults.baseURL}${authSignInEndpoint}`, request);
-                if (response.status != 200) return false;
+                if (response.status !== 200) return false;
                 
                 const { refreshToken, sessionToken, user } = response.data;
                 await saveTokens({
@@ -79,7 +100,7 @@ export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
         signUp: async (request) => {
             try {
                 const response = await axios.post<AuthCreateUserResponse>(`${apiClient.defaults.baseURL}${authCreateUserEndpoint}`, request);
-                if (response.status != 200) return false;
+                if (response.status !== 200) return false;
 
                 const { refreshToken, sessionToken, user } = response.data;
                 await saveTokens({
@@ -110,7 +131,7 @@ export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
                 await clearTokens();
                 setActiveUser(null);
 
-                return response.status == 200;
+                return response.status === 200;
             } catch (error) {
                 console.log(error);
                 return false;

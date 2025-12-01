@@ -19,6 +19,7 @@ export class TransactionDao {
                 if (userBalance == undefined) return false;
 
                 pool.members.set(userId, userBalance + amount);
+                pool.balance += amount;
                 await pool.save({ session });
                 
                 await TransactionModel.create({
@@ -52,6 +53,7 @@ export class TransactionDao {
                 if (userBalance == undefined) return false;
 
                 pool.members.set(transaction.userId, userBalance - transaction.amount);
+                pool.balance -= transaction.amount;
                 await pool.save({ session });
 
                 await transaction.deleteOne({ session });

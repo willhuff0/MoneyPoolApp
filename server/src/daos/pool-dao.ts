@@ -40,6 +40,10 @@ export class PoolDao {
                 if (pool == null) return false;
                 if (pool.owner !== checkOwnerId) return false;
 
+                const userToAdd = await UserModel.findById(userId).session(session);
+                if (userToAdd == null) return false;
+                if (!userToAdd.friends.includes(checkOwnerId)) return false;
+
                 pool.members.set(userId, 0);
                 await pool.save({ session });
 

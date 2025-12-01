@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, FlatList, ActivityIndicator } from "react-native";
-import { useSdk } from "@/api/api-provider";
+import { useApi, useSdk } from "@/api/api-provider";
 import { Transaction } from "@money-pool-app/shared";
 
 interface TransactionListProps {
@@ -9,6 +9,7 @@ interface TransactionListProps {
 
 export function TransactionList({ poolId }: TransactionListProps) {
   const sdk = useSdk();
+  const { activeUser } = useApi(); 
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
@@ -64,7 +65,7 @@ export function TransactionList({ poolId }: TransactionListProps) {
 
     fetchInitial();
     return () => { isMounted = false; };
-  }, [poolId]);
+  }, [poolId, activeUser]);
 
   const handleLoadMore = async () => {
     if (isLoading || !hasMore) return;

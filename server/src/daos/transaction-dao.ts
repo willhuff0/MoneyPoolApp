@@ -1,5 +1,5 @@
 import { Mongoose } from "mongoose";
-import { PoolModel, TransactionDocument, TransactionModel } from "../models"
+import { PoolModel, TransactionDocument, TransactionModel, UserModel } from "../models"
 
 export class TransactionDao {
     db: Mongoose;
@@ -31,6 +31,10 @@ export class TransactionDao {
                     description,
                 });
                 await newTransaction.save({ session });
+
+                await UserModel.findByIdAndUpdate(userId, {
+                    $inc: { chompScore: 5 },
+                }, { session });
                 return true;
             });
         } finally {

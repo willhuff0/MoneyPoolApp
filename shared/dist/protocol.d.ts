@@ -106,6 +106,10 @@ export declare const userDeleteFriendRequestEndpoint = "/user/deleteFriendReques
 export interface UserDeleteFriendRequestRequest {
     otherUserId: string;
 }
+export declare const userDeleteFriendEndpoint = "/user/deleteFriend";
+export interface UserDeleteFriendRequest {
+    otherUserId: string;
+}
 export declare const poolGetPoolsEndpoint = "/pool/getPools";
 export interface PoolGetPoolsRequest {
     poolIds: string[];

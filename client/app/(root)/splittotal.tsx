@@ -17,7 +17,7 @@ export default function SplitTotal() {
             toUserId: string,
             amount: number,
         }[]>([]);
-    const [userNames, setUserNames] = useState<Record<string, string>>({});
+    const [userDetails, setUserDetails] = useState<Record<string, { displayName: string, userName: string }>>({});
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<unknown>(null);
 
@@ -37,14 +37,14 @@ export default function SplitTotal() {
                     userIds.add(t.toUserId);
                 });
 
-                const names: Record<string, string> = {};
+                const details: Record<string, { displayName: string, userName: string }> = {};
                 await Promise.all(Array.from(userIds).map(async (uid) => {
                     const user = await sdk.user.getUser(uid);
                     if (user) {
-                        names[uid] = user.displayName;
+                        details[uid] = { displayName: user.displayName, userName: user.userName };
                     }
                 }));
-                setUserNames(names);
+                setUserDetails(details);
 
             } catch (error) {
                 setError(error);
@@ -54,7 +54,7 @@ export default function SplitTotal() {
         };
 
         fetchData();
-    }, [poolId]);
+    }, [poolId, activeUser]);
 
     if (isLoading) {
         return (
@@ -94,14 +94,24 @@ export default function SplitTotal() {
                     </View>
                 ) : (
                     transfers.map((transfer, index) => {
-                        const fromName = userNames[transfer.fromUserId] || "Loading...";
-                        const toName = userNames[transfer.toUserId] || "Loading...";
+                        const fromUser = userDetails[transfer.fromUserId] || { displayName: "Loading...", userName: "" };
+                        const toUser = userDetails[transfer.toUserId] || { displayName: "Loading...", userName: "" };
                         return (
                             <View key={index} style={styles.transferCard}>
                                 <View style={styles.transferRow}>
-                                    <Text style={styles.userName}>{fromName}</Text>
-                                    <Text style={styles.actionText}> pays </Text>
-                                    <Text style={styles.userName}>{toName}</Text>
+                                    <View style={styles.userColumn}>
+                                        <Text style={styles.displayNameText} numberOfLines={1}>{fromUser.displayName}</Text>
+                                        <Text style={styles.userNameText} numberOfLines={1}>@{fromUser.userName}</Text>
+                                    </View>
+                                    
+                                    <View style={styles.arrowContainer}>
+                                        <Text style={styles.arrow}>→</Text>
+                                    </View>
+
+                                    <View style={styles.userColumn}>
+                                        <Text style={styles.displayNameText} numberOfLines={1}>{toUser.displayName}</Text>
+                                        <Text style={styles.userNameText} numberOfLines={1}>@{toUser.userName}</Text>
+                                    </View>
                                 </View>
                                 <Text style={styles.amount}>${transfer.amount.toFixed(2)}</Text>
                             </View>
@@ -179,23 +189,38 @@ const styles = StyleSheet.create({
     transferRow: {
         flex: 1,
         flexDirection: "row",
-        flexWrap: "wrap",
+        alignItems: "center",
+        marginRight: 10,
+    },
+    userColumn: {
+        flexDirection: "column",
+    },
+    displayNameText: {
+        fontSize: 15,
+        fontWeight: "600",
+        color: "#1428A0",
+    },
+    userNameText: {
+        fontSize: 12,
+        fontWeight: "500",
+        color: "#666",
+        marginTop: 2,
+    },
+    arrowContainer: {
+        paddingHorizontal: 14,
+        justifyContent: "center",
         alignItems: "center",
     },
-    userName: {
-        fontSize: 16,
-        fontWeight: "600",
-        color: "#333",
-    },
-    actionText: {
-        fontSize: 14,
-        color: "#666",
-        marginHorizontal: 4,
+    arrow: {
+        fontSize: 20,
+        color: "#999",
+        fontWeight: "bold",
+        marginTop: -4,
     },
     amount: {
         fontSize: 18,
         fontWeight: "bold",
         color: "#FF8C00",
-        marginLeft: 12,
+        marginLeft: 4,
     },
 });

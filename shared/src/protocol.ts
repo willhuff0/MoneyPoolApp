@@ -125,6 +125,11 @@ export interface UserDeleteFriendRequestRequest {
     otherUserId: string,
 }
 
+export const userDeleteFriendEndpoint = '/user/deleteFriend';
+export interface UserDeleteFriendRequest {
+    otherUserId: string,
+}
+
 //#endregion
 
 //#region Pool

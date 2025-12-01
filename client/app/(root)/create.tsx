@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { ScrollView, View, Text, StyleSheet, TextInput, Pressable, Alert } from "react-native";
 import { useRouter } from "expo-router";
-import { useSdk } from "@/api/api-provider";
+import { useApi, useSdk } from "@/api/api-provider";
 
 export default function CreatePool() {
   const router = useRouter();
   const sdk = useSdk();
+  const { refreshUser } = useApi();
   const [name, setName] = useState("");
   const [creating, setCreating] = useState(false);
 
@@ -21,6 +22,7 @@ export default function CreatePool() {
       const poolId = await sdk.pool.createPool(trimmedName);
       if (poolId) {
         Alert.alert("Success", `Pool '${trimmedName}' created!`);
+        refreshUser();
         router.push("/(root)/poolslist");
       } else {
         Alert.alert("Error", "Failed to create pool");

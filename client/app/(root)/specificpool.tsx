@@ -84,18 +84,21 @@ export default function SpecificPool() {
 
       {/* Owner View/Specific Controls */}
       {isOwner ? (
-        <View style={styles.ownerControls}>
-          <Pressable style={styles.ownerButton} onPress={onSplitTotal}>
-            <Text style={styles.ownerButtonText}>Split Total</Text>
+        <View style={styles.poolControls}>
+          <Pressable style={styles.poolButton} onPress={onSplitTotal}>
+            <Text style={styles.poolButtonText}>Split Total</Text>
           </Pressable>
-          <Pressable style={styles.ownerButton} onPress={onManagePool}>
-            <Text style={styles.ownerButtonText}>Manage Pool</Text>
+          <Pressable style={styles.poolButton} onPress={onManagePool}>
+            <Text style={styles.poolButtonText}>Manage Pool</Text>
           </Pressable>
         </View>
       ) : (
-        <View style={styles.memberControls}>
-          <Pressable style={styles.memberButton} onPress={onViewMembers}>
-            <Text style={styles.memberButtonText}>View Members</Text>
+        <View style={styles.poolControls}>
+          <Pressable style={styles.poolButton} onPress={onSplitTotal}>
+            <Text style={styles.poolButtonText}>Split Total</Text>
+          </Pressable>
+          <Pressable style={styles.poolButton} onPress={onViewMembers}>
+            <Text style={styles.poolButtonText}>View Members</Text>
           </Pressable>
         </View>
       )}
@@ -168,7 +171,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#FF8C00",
   },
-  ownerControls: {
+  poolControls: {
     flexDirection: "row",
     padding: 16,
     gap: 12,
@@ -176,31 +179,14 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#e5e7eb",
   },
-  ownerButton: {
+  poolButton: {
     flex: 1,
     backgroundColor: "#1428A0",
     paddingVertical: 12,
     borderRadius: 10,
     alignItems: "center",
   },
-  ownerButtonText: {
-    color: "#fff",
-    fontWeight: "600",
-    fontSize: 14,
-  },
-  memberControls: {
-    padding: 16,
-    backgroundColor: "#fff",
-    borderBottomWidth: 1,
-    borderBottomColor: "#e5e7eb",
-  },
-  memberButton: {
-    backgroundColor: "#1428A0",
-    paddingVertical: 12,
-    borderRadius: 10,
-    alignItems: "center",
-  },
-  memberButtonText: {
+  poolButtonText: {
     color: "#fff",
     fontWeight: "600",
     fontSize: 14,

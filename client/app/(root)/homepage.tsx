@@ -4,6 +4,8 @@ import { CircularProgressbar , buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import { useApi } from "@/api/api-provider";
 import { useRouter } from "expo-router";
+import { IncomingFriendRequests } from "@/components/incoming-friend-requests";
+import { FriendsList } from "@/components/friends-list";
 
 export default function Homepage() {
     const router = useRouter();
@@ -57,9 +59,7 @@ export default function Homepage() {
   
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Friend Requests</Text>
-          <View style={styles.placeholder}>
-            <Text style={styles.placeholderText}>[Incoming Friend Requests]</Text>
-          </View>
+          <IncomingFriendRequests />
         </View>
         {/* Friend Section */}
          <View style={styles.section}>
@@ -69,6 +69,7 @@ export default function Homepage() {
               <Text style={styles.addButtonText}>Add Friend</Text>
             </Pressable>
           </View>
+          <FriendsList />
           </View>
       </ScrollView>
     );

@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { ScrollView, View, Text, TextInput, Pressable, StyleSheet, Alert } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useSdk } from "@/api/api-provider";
+import { useApi, useSdk } from "@/api/api-provider";
 
 export default function AddTransaction() {
   const router = useRouter();
   const { poolId } = useLocalSearchParams();
   const sdk = useSdk();
+  const { refreshUser } = useApi();
   
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
@@ -35,6 +36,7 @@ export default function AddTransaction() {
 
       if (transactionId) {
         router.replace(`/(root)/specificpool?poolId=${poolId}`);
+        refreshUser();
       } else {
         Alert.alert("Error", "Failed to add transaction");
         setSaving(false);

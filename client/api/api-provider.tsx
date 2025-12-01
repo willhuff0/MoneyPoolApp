@@ -18,6 +18,7 @@ type ActiveUser = {
 
 type ApiContextType = {
     activeUser: ActiveUser,
+    refreshUser: () => Promise<void>,
     doesUserExist: (request: AuthDoesUserExistRequest) => Promise<boolean>,
     signIn: (request: AuthSignInRequest) => Promise<boolean>,
     signUp: (request: AuthCreateUserRequest) => Promise<boolean>,
@@ -70,6 +71,29 @@ export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
 
     const value = useMemo<ApiContextType>(() => ({
         activeUser, ready, client: apiClient, sdk,
+        refreshUser: async () => {
+            if (getRefreshToken() == undefined) return;
+            try {
+                const response = await apiClient.get<UserGetSelfUserResponse>(userGetUserEndpoint);
+                if (response.status === 200) {
+                    const { user } = response.data;
+                    setActiveUser({
+                        userId: user.userId,
+                        userName: user.userName,
+                        email: user.email,
+                        displayName: user.displayName,
+                        chompScore: user.chompScore,
+                        pools: user.pools,
+                        friends: user.friends,
+                        incomingFriendRequests: user.incomingFriendRequests,
+                    });
+                }
+            } catch (error) {
+                console.log(`Not logged in or session expired: ${error}`);
+                await clearTokens();
+                setActiveUser(null);
+            }
+        },
         doesUserExist: async (request) => {
             try {
                 const response = await axios.post<AuthDoesUserExistResponse>(`${apiClient.defaults.baseURL}${authDoesUserExistEndpoint}`, request);

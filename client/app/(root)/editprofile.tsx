@@ -6,10 +6,9 @@ import { useApi } from "@/api/api-provider";
 
 export default function EditProfile() {
   const router = useRouter();
-  const api = useApi();
-  const user = api.activeUser
-  const [displayName, setDisplayName] = useState(api.activeUser?.displayName || "");
-  const [email, setEmail] = useState(api.activeUser?.email || "");
+  const { activeUser, refreshUser, editUser } = useApi();
+  const [displayName, setDisplayName] = useState(activeUser?.displayName || "");
+  const [email, setEmail] = useState(activeUser?.email || "");
   const [password, setPassword] = useState(""); // for new password
 
   return (
@@ -27,11 +26,11 @@ export default function EditProfile() {
           autoCapitalize="none"
           value = {displayName}
           onChangeText={setDisplayName}
-          defaultValue = {user?.displayName}
+          defaultValue = {activeUser?.displayName}
           style={styles.input}
 
         />
-        <Pressable style={[styles.button]} onPress={() => api.editUser({newDisplayName: displayName}) }>
+        <Pressable style={[styles.button]} onPress={() => { editUser({newDisplayName: displayName}); refreshUser(); } }>
           <Text style={{ color: "white", fontWeight: "600"}}>Save New Display Name</Text>
         </Pressable>
         <Text style={styles.sectionTitle }>Email</Text>
@@ -40,10 +39,10 @@ export default function EditProfile() {
           autoCapitalize="none"
           value = {email}
           onChangeText={setEmail}
-          defaultValue= {user?.email}
+          defaultValue= {activeUser?.email}
           style={styles.input}
         />
-        <Pressable style={[styles.button]} onPress={() => api.editUser({newEmail : email })}>
+        <Pressable style={[styles.button]} onPress={() => { editUser({newEmail : email }); refreshUser(); } }>
           <Text style={{ color: "white", fontWeight: "600"}}>Save New Email</Text>
         </Pressable>
         <Text style={styles.sectionTitle}>Password</Text>
@@ -54,7 +53,7 @@ export default function EditProfile() {
           onChangeText={setPassword}
           style={styles.input}
         />
-        <Pressable style={[styles.button]} onPress={() => api.editUser({ newPassword : password}) }>
+        <Pressable style={[styles.button]} onPress={() => { editUser({ newPassword : password}); refreshUser(); } }>
           <Text style={{ color: "white", fontWeight: "600"}}>Save New Password</Text>
         </Pressable>
       </View>

@@ -177,6 +177,8 @@ export class AuthController {
                 displayName: dbUser.displayName,
                 chompScore: dbUser.chompScore,
                 pools: dbUser.pools,
+                friends: dbUser.friends,
+                incomingFriendRequests: dbUser.incomingFriendRequests,
             }
         } as Protocol.AuthSignInResponse);
     }

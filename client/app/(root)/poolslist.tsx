@@ -16,7 +16,7 @@ export default function PoolsIndex() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        if (activeUser!.pools.length === 0) return;
+        if ((activeUser?.pools.length ?? 0) === 0) return;
         const pools = await sdk.pool.getPools(activeUser!.pools);
         setPools(pools);
       } catch (error) {
@@ -27,7 +27,7 @@ export default function PoolsIndex() {
     };
 
     fetchData();
-  }, []);
+  }, [activeUser]);
 
   const onCreatePool = () => {
     //Go to create pool page

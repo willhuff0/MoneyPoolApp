@@ -115,14 +115,30 @@ export class UserDao {
                 const toUser = await UserModel.findById(toUserId).session(session);
                 if (toUser == undefined) return false;
                 
-                toUser.friends.push(fromUserId);
+                toUser.friends = Array.from(new Set([...toUser.friends, fromUserId]));
                 toUser.incomingFriendRequests = toUser.incomingFriendRequests.filter(userId => userId !== fromUserId);
                 await toUser.save({ session });
 
-                fromUser.friends.push(toUserId);
+                fromUser.friends = Array.from(new Set([...fromUser.friends, toUserId]));
                 await fromUser.save({ session });
 
                 return true;
+            });
+        } finally {
+            await session.endSession();
+        }
+    }
+
+    public readonly deleteFriend = async (userId1: string, userId2: string): Promise<void> => {
+        const session = await this.db.startSession();
+        try {
+            await session.withTransaction(async () => {
+                await UserModel.findByIdAndUpdate(userId1, {
+                    $pull: { friends: userId2 }
+                }, { session });
+                await UserModel.findByIdAndUpdate(userId2, {
+                    $pull: { friends: userId1 }
+                }, { session });
             });
         } finally {
             await session.endSession();

@@ -73,6 +73,12 @@ export interface UserGetSelfUserResponse {
         chompScore: number;
     };
 }
+export declare const userEditUserEndpoint = "/user/editUser";
+export interface UserEditUserRequest {
+    newDisplayName?: string;
+    newEmail?: string;
+    newPassword?: string;
+}
 export declare const userSearchUserEndpoint = "/user/searchUser";
 export interface UserSearchUserRequest {
     query: string;

@@ -1,7 +1,10 @@
 import { Request, Response } from "express";
-import { UserDao } from "../daos/user-dao";
+import { UserDao, UserNotUniqueError } from "../daos/user-dao";
 
+import { validateDisplayName, validateEmail, validatePassword } from "@money-pool-app/shared";
 import * as Protocol from '@money-pool-app/shared';
+
+import { HashedUserPassword } from "../security/hashed-user-password";
 
 export class UserController {
     userDao: UserDao;
@@ -49,6 +52,51 @@ export class UserController {
                 chompScore: user.chompScore,
             },
         } as Protocol.UserGetUserResponse);
+    }
+
+    public readonly editUser = async (req: Request, res: Response): Promise<void> => {
+        const body: Protocol.UserEditUserRequest = req.body ?? {};
+        const sessionToken = req.sessionToken!;
+
+        if (body.newDisplayName == undefined && body.newEmail == undefined && body.newPassword == undefined) {
+            res.status(400).json({ message: "At least one field required" } as Protocol.ErrorResponse);
+            return;
+        }
+
+        if (body.newDisplayName != undefined && !validateDisplayName(body.newDisplayName)) {
+            res.status(400).json({ message: "displayName failed validation" } as Protocol.ErrorResponse);
+            return;
+        }
+        if (body.newEmail != undefined && !validateEmail(body.newEmail)) {
+            res.status(400).json({ message: "email failed validation" } as Protocol.ErrorResponse);
+            return;
+        }
+        if (body.newPassword != undefined && !validatePassword(body.newPassword)) {
+            res.status(400).json({ message: "password failed validation" } as Protocol.ErrorResponse);
+            return;
+        }
+
+        const newHashedUserPassword = body.newPassword == undefined ? undefined :  await HashedUserPassword.createNew(body.newPassword);
+
+        try {
+            await this.userDao.editUser(
+                sessionToken.userId,
+                body.newDisplayName,
+                body.newEmail,
+                newHashedUserPassword?.digest,
+            );
+        } catch(e) {
+            if (e instanceof UserNotUniqueError) {
+                res.status(403).json({ code: 1, message: "email is already taken" } as Protocol.ErrorResponse);
+                return;
+            }
+
+            console.log(`Error occurred in user dao: ${e}`);
+            res.status(500).end();
+            return;
+        }
+
+        res.status(200).end();
     }
 
     public readonly searchUser = async (req: Request, res: Response): Promise<void> => {

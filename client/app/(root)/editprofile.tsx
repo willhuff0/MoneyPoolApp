@@ -5,9 +5,10 @@ import { useApi } from "@/api/api-provider";
 
 export default function EditProfile() {
   const api = useApi();
-
-
-
+  const user = api.activeUser
+  const [displayName, setDisplayName] = useState(api.activeUser?.displayName || "");
+  const [email, setEmail] = useState(api.activeUser?.email || "");
+  const [password, setPassword] = useState(""); // for new password
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -17,27 +18,37 @@ export default function EditProfile() {
         <TextInput
           placeholder="Enter New Display Name"
           autoCapitalize="none"
+          value = {displayName}
+          onChangeText={setDisplayName}
+          defaultValue = {user?.displayName}
           style={styles.input}
-        //   onSubmitEditing={}
+
         />
-        <Text style={styles.sectionTitle}>Email</Text>
+        <Pressable style={[styles.button]} onPress={() => api.editUser({newDisplayName: displayName}) }>
+          <Text style={{ color: "white", fontWeight: "600"}}>Save New Display Name</Text>
+        </Pressable>
+        <Text style={styles.sectionTitle }>Email</Text>
         <TextInput
           placeholder="Enter New Email"
           autoCapitalize="none"
+          value = {email}
+          onChangeText={setEmail}
+          defaultValue= {user?.email}
           style={styles.input}
-        //   onSubmitEditing={}
         />
+        <Pressable style={[styles.button]} onPress={() => api.editUser({newEmail : email })}>
+          <Text style={{ color: "white", fontWeight: "600"}}>Save New Email</Text>
+        </Pressable>
         <Text style={styles.sectionTitle}>Password</Text>
         <TextInput
           placeholder="Enter New Password"
           autoCapitalize="none"
+          value = {password}
+          onChangeText={setPassword}
           style={styles.input}
-        //   onSubmitEditing={}
         />
-
-
-        <Pressable style={[styles.button]}>
-          <Text style={{ color: "white", fontWeight: "600"}}>Save</Text>
+        <Pressable style={[styles.button]} onPress={() => api.editUser({ newPassword : password}) }>
+          <Text style={{ color: "white", fontWeight: "600"}}>Save New Password</Text>
         </Pressable>
       </View>
     </ScrollView>
@@ -61,6 +72,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 16,
+    marginTop: 16,
   },
   subtitleText: {
     fontSize: 14,

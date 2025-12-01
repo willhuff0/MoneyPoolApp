@@ -28,7 +28,7 @@ export class PoolDao {
         const session = await this.db.startSession();
         try {
             return await session.withTransaction(async () => {
-                const pool = await PoolModel.findById(poolId, { session });
+                const pool = await PoolModel.findById(poolId).session(session);
                 if (pool == null) return false;
                 if (pool.owner !== checkOwnerId) return false;
 
@@ -46,7 +46,7 @@ export class PoolDao {
         const session = await this.db.startSession();
         try {
             return await session.withTransaction(async () => {
-                const pool = await PoolModel.findById(poolId, { session });
+                const pool = await PoolModel.findById(poolId).session(session);
                 if (pool == null) return false;
                 if (pool.owner !== checkOwnerId) return false;
 
@@ -64,7 +64,7 @@ export class PoolDao {
         const session = await this.db.startSession();
         try {
             return await session.withTransaction(async () => {
-                const pool = await PoolModel.findById(poolId, { session });
+                const pool = await PoolModel.findById(poolId).session(session);
                 if (pool == null) return false;
                 if (pool.owner !== checkOwnerId) return false;
 

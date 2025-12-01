@@ -82,7 +82,7 @@ export class UserDao {
         const session = await this.db.startSession();
         try {
             return await session.withTransaction(async () => {
-                const fromUser = await UserModel.findById(fromUserId, { session });
+                const fromUser = await UserModel.findById(fromUserId).session(session);
                 if (fromUser == undefined) return false;
                 if (fromUser.friends.includes(toUserId)) return false;
 
@@ -106,13 +106,13 @@ export class UserDao {
         const session = await this.db.startSession();
         try {
             return await session.withTransaction(async () => {
-                const fromUser = await UserModel.findById(fromUserId, { session });
+                const fromUser = await UserModel.findById(fromUserId).session(session);
                 if (fromUser == undefined) {
                     this.deleteFriendRequest(fromUserId, toUserId, session);
                     return false;
                 }
 
-                const toUser = await UserModel.findById(toUserId, { session });
+                const toUser = await UserModel.findById(toUserId).session(session);
                 if (toUser == undefined) return false;
                 
                 toUser.friends.push(fromUserId);

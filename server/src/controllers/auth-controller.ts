@@ -84,7 +84,7 @@ export class AuthController {
                 body.displayName,
                 hashedUserPassword.digest,
                 timestamp,
-            )
+            );
         } catch(e) {
             if (e instanceof UserNotUniqueError) {
                 res.status(403).json({ code: 1, message: "userName or email is already taken" } as Protocol.ErrorResponse);

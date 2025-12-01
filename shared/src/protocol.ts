@@ -87,6 +87,13 @@ export interface UserGetSelfUserResponse {
     },
 }
 
+export const userEditUserEndpoint = '/user/editUser';
+export interface UserEditUserRequest {
+    newDisplayName?: string,
+    newEmail?: string,
+    newPassword?: string,
+}
+
 export const userSearchUserEndpoint = '/user/searchUser';
 export interface UserSearchUserRequest {
     query: string,

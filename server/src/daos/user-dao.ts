@@ -43,6 +43,24 @@ export class UserDao {
         }
     }
 
+    public editUser = async (userId: string, newDisplayName?: string, newEmail?: string, newPasswordDigest?: string): Promise<void> => {
+        try {
+            await UserModel.findByIdAndUpdate(userId, {
+                displayName: newDisplayName,
+                email: newEmail,
+                passwordDigest: newPasswordDigest,
+            });
+        } catch(e: any) {
+            if (e.code === 11000) {
+                // Duplicate key error
+                const field = Object.keys(e.keyValue)[0];
+                throw new UserNotUniqueError(`Duplicate ${field}: A user with this ${field} already exists.`);
+            } else {
+                throw e;
+            }
+        }
+    }
+
     public getUserById = async (userId: string): Promise<UserDocument | null> => {
         return await UserModel.findById(userId);
     }

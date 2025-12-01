@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { apiClient } from './client';
 import { loadTokens, saveTokens, clearTokens, getRefreshToken } from './tokens';
-import { authCreateUserEndpoint, AuthCreateUserRequest, AuthCreateUserResponse, authDoesUserExistEndpoint, AuthDoesUserExistRequest, AuthDoesUserExistResponse, authInvalidateTokensEndpoint, AuthInvalidateTokensRequest, authSignInEndpoint, AuthSignInRequest, AuthSignInResponse, UserGetSelfUserResponse, userGetUserEndpoint, UserGetUserResponse } from '@money-pool-app/shared';
+import { authCreateUserEndpoint, AuthCreateUserRequest, AuthCreateUserResponse, authDoesUserExistEndpoint, AuthDoesUserExistRequest, AuthDoesUserExistResponse, authInvalidateTokensEndpoint, AuthInvalidateTokensRequest, authSignInEndpoint, AuthSignInRequest, AuthSignInResponse, userEditUserEndpoint, UserEditUserRequest, UserGetSelfUserResponse, userGetUserEndpoint, UserGetUserResponse } from '@money-pool-app/shared';
 import { createApiSdk, Sdk } from './sdk';
 import axios from 'axios';
 
@@ -20,6 +20,7 @@ type ApiContextType = {
     signUp: (request: AuthCreateUserRequest) => Promise<boolean>,
     signOut: () => Promise<void>,
     signOutAll: (request: AuthInvalidateTokensRequest) => Promise<boolean>,
+    editUser: (request: UserEditUserRequest) => Promise<boolean>,
     ready: boolean,
     client: typeof apiClient,
     sdk: Sdk,
@@ -132,6 +133,25 @@ export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
                 setActiveUser(null);
 
                 return response.status === 200;
+            } catch (error) {
+                console.log(error);
+                return false;
+            }
+        },
+        editUser: async (request) => {
+            try {
+                if (activeUser == null) return false;
+                const response = await apiClient.post(userEditUserEndpoint, request);
+                if (response.status !== 200) return false;
+                if (activeUser == null) return false;
+                setActiveUser({
+                    userId: activeUser.userId,
+                    userName: activeUser.userName,
+                    email: request.newEmail ?? activeUser.email,
+                    displayName: request.newDisplayName ?? activeUser.displayName,
+                    chompScore: activeUser.chompScore,
+                });
+                return true;
             } catch (error) {
                 console.log(error);
                 return false;

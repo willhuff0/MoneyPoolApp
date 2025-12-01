@@ -67,6 +67,7 @@ export default function AddTransaction() {
         <Text style={styles.label}>Purpose of Transaction</Text>
         <TextInput
           style={styles.input}
+          placeholderTextColor="#888"
           placeholder="e.g. Bought gas"
           value={description}
           onChangeText={setDescription}
@@ -76,6 +77,7 @@ export default function AddTransaction() {
         <Text style={[styles.label, { marginTop: 12 }]}>Amount</Text>
         <TextInput
           style={styles.input}
+          placeholderTextColor="#888"
           placeholder="$0.00"
           value={amount}
           onChangeText={setAmount}

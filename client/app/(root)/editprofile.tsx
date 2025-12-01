@@ -23,6 +23,7 @@ export default function EditProfile() {
         <Text style={styles.sectionTitle}>Display Name</Text>
         <TextInput
           placeholder="Enter New Display Name"
+          placeholderTextColor="#888"
           autoCapitalize="none"
           value = {displayName}
           onChangeText={setDisplayName}
@@ -36,6 +37,7 @@ export default function EditProfile() {
         <Text style={styles.sectionTitle }>Email</Text>
         <TextInput
           placeholder="Enter New Email"
+          placeholderTextColor="#888"
           autoCapitalize="none"
           value = {email}
           onChangeText={setEmail}
@@ -48,6 +50,7 @@ export default function EditProfile() {
         <Text style={styles.sectionTitle}>Password</Text>
         <TextInput
           placeholder="Enter New Password"
+          placeholderTextColor="#888"
           autoCapitalize="none"
           value = {password}
           onChangeText={setPassword}

@@ -47,7 +47,7 @@ export default function CreatePool() {
         </View>
 
         <Text style={styles.label}>Pool name</Text>
-        <TextInput style={styles.input} value={name} onChangeText={setName} placeholder="e.g. Weekend Trip" />
+        <TextInput style={styles.input} value={name} onChangeText={setName} placeholder="e.g. Weekend Trip" placeholderTextColor="#888" />
 
         <Text style={[styles.label, { marginTop: 12 }]}>Initial amount</Text>
         <Text style={styles.amountText}>$0.00</Text>

@@ -63,6 +63,7 @@ export default function PasswordScreen() {
           <Text style={{ marginTop: 6 }}>Password</Text>
           <TextInput
             placeholder="••••••••"
+            placeholderTextColor="#888"
             secureTextEntry
             value={password}
             onChangeText={setPassword}

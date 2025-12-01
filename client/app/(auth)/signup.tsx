@@ -1,5 +1,5 @@
 // client/app/(auth)/signup.tsx
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 import AuthBg from "../../components/AuthBg";
@@ -11,10 +11,11 @@ import { useAlert } from "@/components/ui/custom-alert";
 export default function SignupScreen() {
   const api = useApi();
   const { showAlert } = useAlert();
+  const params = useLocalSearchParams<{ email?: string; userName?: string }>();
 
   const [displayName, setDisplayName] = useState("");
-  const [userName, setUserName] = useState("");
-  const [email, setEmail] = useState("");
+  const [userName, setUserName] = useState(params.userName || "");
+  const [email, setEmail] = useState(params.email || "");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -63,6 +64,7 @@ export default function SignupScreen() {
           <Text>Display Name</Text>
           <TextInput
             placeholder="Your Name"
+            placeholderTextColor="#888"
             autoCapitalize="words"
             value={displayName}
             onChangeText={setDisplayName}
@@ -72,6 +74,7 @@ export default function SignupScreen() {
           <Text>Username</Text>
           <TextInput
             placeholder="your_username"
+            placeholderTextColor="#888"
             autoCapitalize="none"
             value={userName}
             onChangeText={setUserName}
@@ -81,6 +84,7 @@ export default function SignupScreen() {
           <Text>Email</Text>
           <TextInput
             placeholder="you@ufl.edu"
+            placeholderTextColor="#888"
             keyboardType="email-address"
             autoCapitalize="none"
             autoCorrect={false}
@@ -92,6 +96,7 @@ export default function SignupScreen() {
           <Text>Password</Text>
           <TextInput
             placeholder="••••••••"
+            placeholderTextColor="#888"
             secureTextEntry
             autoCapitalize="none"
             value={password}

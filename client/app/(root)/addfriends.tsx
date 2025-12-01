@@ -60,6 +60,7 @@ export default function AddFriendsScreen() {
 
         <TextInput
           placeholder="username"
+          placeholderTextColor="#888"
           autoCapitalize="none"
           value={query}
           onChangeText={setQuery}

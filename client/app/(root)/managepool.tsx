@@ -11,7 +11,7 @@ export default function ManagePool() {
   const { activeUser } = useApi();
   
   const [pool, setPool] = useState<any>(null);
-  const [members, setMembers] = useState<any[]>([]);
+  const [memberDetails, setMemberDetails] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   //For testing: set true for owner, false for member 
   const [isOwner, setIsOwner] = useState(false);
@@ -25,15 +25,19 @@ export default function ManagePool() {
     const mockPool = {
       poolId: "mock-pool-1",
       displayName: "Weekend Trip",
-      ownerUserId: activeUser?.userId,
-      members: [
-        { userId: "user1", userName: "alice", displayName: "Alice" },
-        { userId: "user2", userName: "bob", displayName: "Bob" },
-        { userId: "user3", userName: "charlie", displayName: "Charlie" },
-      ],
+    //   ownerUserId: activeUser?.userId,
+      ownerUserId: "user1",
+      members: { "user1": 0, "user2": 0, "user3": 0 },
+      balance: 0,
     };
+    // Mock member details
+    const mockMemberDetails = [
+      { userId: "user1", userName: "alice", displayName: "Alice" },
+      { userId: "user2", userName: "bob", displayName: "Bob" },
+      { userId: "user3", userName: "charlie", displayName: "Charlie" },
+    ];
     setPool(mockPool);
-    setMembers(mockPool.members);
+    setMemberDetails(mockMemberDetails);
     setIsOwner(mockPool.ownerUserId === activeUser?.userId);
     
     // Will uncomment when connecting to backend
@@ -48,7 +52,13 @@ export default function ManagePool() {
       const poolData = await sdk.pool.getPool(poolId);
       if (poolData) {
         setPool(poolData);
-        setMembers(poolData.members || []);
+        
+        // Fetch user details for each member
+        const memberUserIds = Object.keys(poolData.members || {});
+        const memberDetailsPromises = memberUserIds.map(userId => sdk.user.getUser(userId));
+        const fetchedMemberDetails = await Promise.all(memberDetailsPromises);
+        
+        setMemberDetails(fetchedMemberDetails.filter(user => user !== null));
         setIsOwner(poolData.ownerUserId === activeUser?.userId);
       }
     } catch (e) {
@@ -80,7 +90,7 @@ export default function ManagePool() {
       
       if (success) {
         //Dynamic updates for members list 
-        setMembers([...members, user]);
+        setMemberDetails([...memberDetails, user]);
         setAddUsername("");
         Alert.alert("Success", `${user.displayName} added to pool`);
       } else {
@@ -112,7 +122,7 @@ export default function ManagePool() {
       }
 
       // Check if user is in the pool
-      const memberExists = members.find(m => m.userId === user.userId);
+      const memberExists = memberDetails.find(m => m.userId === user.userId);
       if (!memberExists) {
         Alert.alert("Error", "User is not a member of this pool");
         setRemovingMember(false);
@@ -124,7 +134,7 @@ export default function ManagePool() {
       
       if (success) {
         // Update members list
-        setMembers(members.filter(m => m.userId !== user.userId));
+        setMemberDetails(memberDetails.filter(m => m.userId !== user.userId));
         setRemoveUsername("");
         Alert.alert("Success", `${user.displayName} removed from pool`);
       } else {
@@ -201,14 +211,14 @@ export default function ManagePool() {
 
       {/* Members List */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Members ({members.length})</Text>
-        {members.length === 0 ? (
+        <Text style={styles.sectionTitle}>Members ({memberDetails.length})</Text>
+        {memberDetails.length === 0 ? (
           <View style={styles.placeholder}>
             <Text style={styles.placeholderText}>No members yet</Text>
           </View>
         ) : (
           <View style={styles.membersList}>
-            {members.map((member) => (
+            {memberDetails.map((member) => (
               <View key={member.userId} style={styles.memberItem}>
                 <View>
                   <Text style={styles.memberName}>{member.displayName}</Text>

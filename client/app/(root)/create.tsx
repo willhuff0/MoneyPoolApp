@@ -1,19 +1,21 @@
 import React, { useState } from "react";
-import { ScrollView, View, Text, StyleSheet, TextInput, Pressable, Alert } from "react-native";
+import { ScrollView, View, Text, StyleSheet, TextInput, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import { useApi, useSdk } from "@/api/api-provider";
+import { useAlert } from "@/components/ui/custom-alert";
 
 export default function CreatePool() {
   const router = useRouter();
   const sdk = useSdk();
   const { refreshUser } = useApi();
+  const { showAlert } = useAlert();
   const [name, setName] = useState("");
   const [creating, setCreating] = useState(false);
 
   async function onCreate() {
     const trimmedName = name.trim();
     if (!trimmedName) {
-      Alert.alert("Error", "Please enter a pool name");
+      showAlert("Error", "Please enter a pool name");
       return;
     }
 
@@ -21,15 +23,14 @@ export default function CreatePool() {
     try {
       const poolId = await sdk.pool.createPool(trimmedName);
       if (poolId) {
-        Alert.alert("Success", `Pool '${trimmedName}' created!`);
         refreshUser();
         router.push("/(root)/poolslist");
       } else {
-        Alert.alert("Error", "Failed to create pool");
+        showAlert("Error", "Failed to create pool");
       }
     } catch (e) {
       console.error("Error creating pool:", e);
-      Alert.alert("Error", "Failed to create pool");
+      showAlert("Error", "Failed to create pool");
     } finally {
       setCreating(false);
     }

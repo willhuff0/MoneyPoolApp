@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { ScrollView, View, Text, StyleSheet, Pressable, TextInput, Alert, Modal, FlatList, ActivityIndicator, SafeAreaView } from "react-native";
+import { ScrollView, View, Text, StyleSheet, Pressable, TextInput, Modal, FlatList, ActivityIndicator, SafeAreaView } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 //for API calls
 import { useSdk, useApi } from "@/api/api-provider";
 import { Pool, User } from "@money-pool-app/shared";
+import { useAlert } from "@/components/ui/custom-alert";
 
 export const withoutElement = (map: Map<string, any>, key: string): Map<string, any> => {
   let newMap = new Map(map);
@@ -22,6 +23,7 @@ export default function ManagePool() {
   const { poolId } = useLocalSearchParams();
   const sdk = useSdk();
   const { activeUser, refreshUser } = useApi();
+  const { showAlert } = useAlert();
   
   const [pool, setPool] = useState<Pool | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -148,7 +150,7 @@ useEffect(() => {
         }
       }
       
-      Alert.alert(
+      showAlert(
         "Result", 
         `Added ${successCount} member(s).${failCount > 0 ? ` Failed to add ${failCount}.` : ""}`
       );
@@ -159,7 +161,7 @@ useEffect(() => {
       
     } catch (e) {
       console.error("Error adding members:", e);
-      Alert.alert("Error", "An unexpected error occurred");
+      showAlert("Error", "An unexpected error occurred");
     } finally {
       setAddingMember(false);
     }
@@ -179,20 +181,19 @@ useEffect(() => {
           members: withoutElement(pool!.members, userId),
         });
         setUserNames(withoutElement(userNames, userId));
-        Alert.alert("Success", `${displayName} removed from pool`);
       } else {
-        Alert.alert("Error", "Failed to remove member");
+        showAlert("Error", "Failed to remove member");
       }
     } catch (e) {
       console.error("Error removing member:", e);
-      Alert.alert("Error", "Failed to remove member");
+      showAlert("Error", "Failed to remove member");
     } finally {
       setRemovingMember(false);
     }
   }
 
   async function handleDeletePool() {
-    Alert.alert(
+    showAlert(
       "Delete Pool",
       "Are you sure you want to delete this pool? This action cannot be undone.",
       [
@@ -207,15 +208,14 @@ useEffect(() => {
             try {
               const success = await sdk.pool.deletePool(poolId as string);
               if (success) {
-                Alert.alert("Success", "Pool deleted successfully");
                 router.replace("/(root)/poolslist");
                 refreshUser();
               } else {
-                Alert.alert("Error", "Failed to delete pool");
+                showAlert("Error", "Failed to delete pool");
               }
             } catch (e) {
               console.error("Error deleting pool:", e);
-              Alert.alert("Error", "Failed to delete pool");
+              showAlert("Error", "Failed to delete pool");
             }
           },
         },

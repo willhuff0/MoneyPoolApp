@@ -1,14 +1,16 @@
 // client/app/(auth)/password.tsx
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { Alert, Pressable, Text, TextInput, View } from "react-native";
+import { Pressable, Text, TextInput, View } from "react-native";
 import AuthBg from "../../components/AuthBg";
 import AuthCard from "../../components/AuthCard";
 import { validatePassword } from "@money-pool-app/shared";
 import { useApi } from "@/api/api-provider";
+import { useAlert } from "@/components/ui/custom-alert";
 
 export default function PasswordScreen() {
   const api = useApi();
+  const { showAlert } = useAlert();
 
   // params from identifier screen
   const { type, value } = useLocalSearchParams<{ type?: string; value?: string }>();
@@ -18,15 +20,15 @@ export default function PasswordScreen() {
 
   const onLogin = async () => {
     if (!value || !type) {
-      Alert.alert("Missing info", "Please go back and enter your email or username.");
+      showAlert("Missing info", "Please go back and enter your email or username.");
       return;
     }
     if (!password.trim()) {
-      Alert.alert("Missing password", "Please enter your password.");
+      showAlert("Missing password", "Please enter your password.");
       return;
     }
     if (!validatePassword(password.trim())) {
-      Alert.alert("Invalid info", "Password is invalid.");
+      showAlert("Invalid info", "Password is invalid.");
       return;
     }
 
@@ -39,10 +41,9 @@ export default function PasswordScreen() {
 
       if (await api.signIn(payload)) {
         // Token saved automatically
-        Alert.alert("Welcome!", `Logged in as ${api.activeUser?.displayName}`);
         router.replace("/(root)/homepage");
       } else {
-        Alert.alert("Login failed", "Password is incorrect.");
+        showAlert("Login failed", "Password is incorrect.");
       }
     } finally {
       setBusy(false);

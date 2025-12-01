@@ -38,7 +38,7 @@ export default function IdentifierScreen() {
       } else {
         // Go to sign up screen; it will perform the actual sign up API call.
         router.push({
-          pathname: "/(root)/homepage",
+          pathname: "/(auth)/signup",
         });
       }
     } catch (e) {

@@ -51,10 +51,46 @@ export default function RootLayout() {
           }}
         />
         <Tabs.Screen
-          name="settings"
+          name="profile"
           options={{
-            title: "Settings",
+            title: "Profile",
             tabBarIcon: () => <Text>⚙️</Text>,
+          }}
+        />
+        <Tabs.Screen
+          name="addfriends"
+          options={{
+            href: null
+          }}
+        />
+        <Tabs.Screen
+          name="addtransaction"
+          options={{
+            href: null
+          }}
+        />
+        <Tabs.Screen
+          name="create"
+          options={{
+            href: null
+          }}
+        />
+        <Tabs.Screen
+          name="editprofile"
+          options={{
+            href: null
+          }}
+        />
+        <Tabs.Screen
+          name="managepool"
+          options={{
+            href: null
+          }}
+        />
+        <Tabs.Screen
+          name="specificpool"
+          options={{
+            href: null
           }}
         />
       </Tabs>

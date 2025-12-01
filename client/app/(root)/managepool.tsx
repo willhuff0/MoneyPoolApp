@@ -3,6 +3,13 @@ import { ScrollView, View, Text, StyleSheet, Pressable, TextInput, Alert } from 
 import { useLocalSearchParams, useRouter } from "expo-router";
 //for API calls
 import { useSdk, useApi } from "@/api/api-provider";
+import { Pool } from "@money-pool-app/shared";
+
+export const withoutElement = (map: Map<string, any>, key: string): Map<string, any> => {
+  let newMap = new Map(map);
+  newMap.delete(key);
+  return newMap;
+}
 
 export default function ManagePool() {
   const router = useRouter();
@@ -10,63 +17,44 @@ export default function ManagePool() {
   const sdk = useSdk();
   const { activeUser } = useApi();
   
-  const [pool, setPool] = useState<any>(null);
-  const [memberDetails, setMemberDetails] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  //For testing: set true for owner, false for member 
+  const [pool, setPool] = useState<Pool | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<unknown>(null);
   const [isOwner, setIsOwner] = useState(true);
+  const [userNames, setUserNames] = useState<Map<string, {userName: string, displayName: string}>>(new Map());
   const [addUsername, setAddUsername] = useState("");
   const [removeUsername, setRemoveUsername] = useState("");
   const [addingMember, setAddingMember] = useState(false);
   const [removingMember, setRemovingMember] = useState(false);
 
-  useEffect(() => {
-    // Mock pool data for testing
-    const mockPool = {
-      poolId: "mock-pool-1",
-      displayName: "Weekend Trip",
-      ownerUserId: activeUser?.userId,
-      // ownerUserId: "user1",
-      members: { "user1": 0, "user2": 0, "user3": 0 },
-      balance: 0,
-    };
-    // Mock member details
-    const mockMemberDetails = [
-      { userId: "user1", userName: "alice", displayName: "Alice" },
-      { userId: "user2", userName: "bob", displayName: "Bob" },
-      { userId: "user3", userName: "charlie", displayName: "Charlie" },
-    ];
-    setPool(mockPool);
-    setMemberDetails(mockMemberDetails);
-    setIsOwner(mockPool.ownerUserId === activeUser?.userId);
-    
-    // Will uncomment when connecting to backend
-    // loadPool();
-  }, [poolId]);
+useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (!poolId || typeof poolId !== 'string') return;
 
-  async function loadPool() {
-    if (!poolId || typeof poolId !== 'string') return;
-    
-    setLoading(true);
-    try {
-      const poolData = await sdk.pool.getPool(poolId);
-      if (poolData) {
-        setPool(poolData);
-        
-        // Fetch user details for each member
-        const memberUserIds = Object.keys(poolData.members || {});
-        const memberDetailsPromises = memberUserIds.map(userId => sdk.user.getUser(userId));
-        const fetchedMemberDetails = await Promise.all(memberDetailsPromises);
-        
-        setMemberDetails(fetchedMemberDetails.filter(user => user !== null));
-        setIsOwner(poolData.ownerUserId === activeUser?.userId);
+        const pools = await sdk.pool.getPools([poolId as string]);
+        setPool(pools.at(0) ?? null);
+        setIsOwner(pools.at(0)?.ownerUserId === activeUser!.userId);
+
+        if (pools.at(0) == null) {
+          setUserNames(new Map());
+        } else {
+          const newUserNames = new Map<string, {userName: string, displayName: string}>();
+          await Promise.all(pools.at(0)!.members.keys().map(async (id) => {
+            const user = await sdk.user.getUser(id);
+            if (user) newUserNames.set(id, {userName: user.userName, displayName: user.displayName});
+          }));
+          setUserNames(newUserNames);
+        }
+      } catch (error) {
+        setError(error);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (e) {
-      console.error("Error loading pool:", e);
-    } finally {
-      setLoading(false);
-    }
-  }
+    };
+
+    fetchData();
+  }, [poolId]);
 
   async function handleAddMember() {
     if (!addUsername.trim()) {
@@ -90,7 +78,11 @@ export default function ManagePool() {
       
       if (success) {
         //Dynamic updates for members list 
-        setMemberDetails([...memberDetails, user]);
+        setPool({
+          ...pool!,
+          members: new Map({...pool!.members, [user.userId]: 0}),
+        });
+        setUserNames(new Map({...userNames, [user.userId]: user.userName}));
         setAddUsername("");
         Alert.alert("Success", `${user.displayName} added to pool`);
       } else {
@@ -122,7 +114,7 @@ export default function ManagePool() {
       }
 
       // Check if user is in the pool
-      const memberExists = memberDetails.find(m => m.userId === user.userId);
+      const memberExists = pool?.members.has(user.userId);
       if (!memberExists) {
         Alert.alert("Error", "User is not a member of this pool");
         setRemovingMember(false);
@@ -134,7 +126,11 @@ export default function ManagePool() {
       
       if (success) {
         // Update members list
-        setMemberDetails(memberDetails.filter(m => m.userId !== user.userId));
+        setPool({
+          ...pool!,
+          members: withoutElement(pool!.members, user.userId),
+        });
+        setUserNames(withoutElement(userNames, user.userId));
         setRemoveUsername("");
         Alert.alert("Success", `${user.displayName} removed from pool`);
       } else {
@@ -183,10 +179,18 @@ export default function ManagePool() {
     router.push(`/(root)/specificpool?poolId=${poolId}`);
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
       <View style={styles.container}>
         <Text>Loading...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.container}>
+        <Text>{String(error)}</Text>
       </View>
     );
   }
@@ -198,6 +202,8 @@ export default function ManagePool() {
       </View>
     );
   }
+
+  const userNameArray = Array.from(userNames.entries()); 
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -211,20 +217,20 @@ export default function ManagePool() {
 
       {/* Members List */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Members ({memberDetails.length})</Text>
-        {memberDetails.length === 0 ? (
+        <Text style={styles.sectionTitle}>Members ({userNames.size})</Text>
+        {userNames.size === 0 ? (
           <View style={styles.placeholder}>
             <Text style={styles.placeholderText}>No members yet</Text>
           </View>
         ) : (
           <View style={styles.membersList}>
-            {memberDetails.map((member) => (
-              <View key={member.userId} style={styles.memberItem}>
+            {userNameArray.map(([userId, member]) => (
+              <View key={userId} style={styles.memberItem}>
                 <View>
                   <Text style={styles.memberName}>{member.displayName}</Text>
                   <Text style={styles.memberUsername}>@{member.userName}</Text>
                 </View>
-                {member.userId === pool.ownerUserId && (
+                {userId === pool.ownerUserId && (
                   <View style={styles.ownerBadge}>
                     <Text style={styles.ownerBadgeText}>Owner</Text>
                   </View>

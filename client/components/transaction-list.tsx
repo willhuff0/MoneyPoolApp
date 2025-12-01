@@ -10,11 +10,10 @@ interface TransactionListProps {
 export function TransactionList({ poolId }: TransactionListProps) {
   const sdk = useSdk();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  // Initialize isLoading to true to prevent race conditions with onEndReached on mount
   const [isLoading, setIsLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
   const [start, setStart] = useState(0);
-  const [userNames, setUserNames] = useState<Record<string, string>>({});
+  const [userNames, setUserNames] = useState<Record<string, {userName: string, displayName: string}>>({});
   const LIMIT = 20;
 
   const fetchMissingUsers = async (txs: Transaction[]) => {
@@ -23,11 +22,14 @@ export function TransactionList({ poolId }: TransactionListProps) {
     
     if (missingIds.length === 0) return;
 
-    const newNames: Record<string, string> = {};
+    const newNames: Record<string, {userName: string, displayName: string}> = {};
     await Promise.all(missingIds.map(async (id) => {
       try {
         const user = await sdk.user.getUser(id);
-        if (user) newNames[id] = user.displayName;
+        if (user) newNames[id] = {
+          userName: user.userName,
+          displayName: user.displayName,
+        };
       } catch (e) {
         console.warn(`Failed to fetch user ${id}`, e);
       }
@@ -87,16 +89,19 @@ export function TransactionList({ poolId }: TransactionListProps) {
 
   const renderItem = ({ item }: { item: Transaction }) => (
     <View style={styles.transactionBubble}>
-      <View style={styles.transactionHeader}>
-        <Text style={styles.transactionUser}>
-          {userNames[item.userId] || item.userId}
-        </Text>
+      <View style={styles.leftColumn}>
+        <Text style={styles.transactionUserDisplayName}>{userNames[item.userId]?.displayName}</Text>
+        <Text style={styles.transactionUserName}>@{userNames[item.userId]?.userName}</Text>
+      </View>
+      <View style={styles.centerColumn}>
+        <Text style={styles.transactionDescription}>{item.description}</Text>
+      </View>
+      <View style={styles.rightColumn}>
         <Text style={styles.transactionDate}>
           {new Date(item.timestamp).toLocaleDateString()}
         </Text>
+        <Text style={styles.transactionAmount}>${item.amount.toFixed(2)}</Text>
       </View>
-      <Text style={styles.transactionDescription}>{item.description}</Text>
-      <Text style={styles.transactionAmount}>${item.amount.toFixed(2)}</Text>
     </View>
   );
 
@@ -143,17 +148,33 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 2,
     elevation: 1,
-  },
-  transactionHeader: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 4,
   },
-  transactionUser: {
+  leftColumn: {
+    flexDirection: "column",
+    marginRight: 24,
+    maxWidth: "30%",
+  },
+  centerColumn: {
+    flex: 1,
+    justifyContent: "center",
+  },
+  rightColumn: {
+    flexDirection: "column",
+    alignItems: "flex-end",
+    justifyContent: "space-between",
+    marginLeft: 18,
+  },
+  transactionUserDisplayName: {
     fontSize: 16,
     fontWeight: "600",
     color: "#1428A0",
+  },
+  transactionUserName: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#1428A0",
+    marginTop: 6,
   },
   transactionDate: {
     fontSize: 12,
@@ -162,9 +183,9 @@ const styles = StyleSheet.create({
   transactionDescription: {
     fontSize: 16,
     color: "#333",
-    marginBottom: 8,
   },
   transactionAmount: {
+    marginTop: 6,
     fontSize: 18,
     fontWeight: "bold",
     color: "#FF8C00",

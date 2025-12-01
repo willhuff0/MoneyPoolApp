@@ -8,6 +8,7 @@
   ],
   "scripts": {
     "build": "npm run build -w shared && npm run build -w server",
+    "start": "npm run start -w server",
     "dev:server": "npm run dev -w server",
     "dev:client": "npm run start -w client"
   },

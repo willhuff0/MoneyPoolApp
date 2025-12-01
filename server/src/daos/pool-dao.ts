@@ -88,7 +88,7 @@ export class PoolDao {
                 if (pool == null) return false;
                 if (pool.owner !== checkOwnerId) return false;
 
-                for (const member of Object.keys(pool.members)) {
+                for (const member of pool.members.keys()) {
                     await UserModel.findByIdAndUpdate(member, {
                         $pull: { pools: poolId },
                     }, { session });

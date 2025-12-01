@@ -21,7 +21,7 @@ export default function ManagePool() {
   const router = useRouter();
   const { poolId } = useLocalSearchParams();
   const sdk = useSdk();
-  const { activeUser } = useApi();
+  const { activeUser, refreshUser } = useApi();
   
   const [pool, setPool] = useState<Pool | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -49,14 +49,14 @@ useEffect(() => {
           setUserNames(new Map());
         } else {
           const newUserNames = new Map<string, {userName: string, displayName: string}>();
-          await Promise.all(pools.at(0)!.members.keys().map(async (id) => {
+          await Promise.all(Array.from(pools.at(0)!.members.keys()).map(async (id) => {
             const user = await sdk.user.getUser(id);
             if (user) newUserNames.set(id, {userName: user.userName, displayName: user.displayName});
           }));
           setUserNames(newUserNames);
         }
       } catch (error) {
-        setError(error);
+        setError(String(error));
       } finally {
         setIsLoading(false);
       }
@@ -209,6 +209,7 @@ useEffect(() => {
               if (success) {
                 Alert.alert("Success", "Pool deleted successfully");
                 router.replace("/(root)/poolslist");
+                refreshUser();
               } else {
                 Alert.alert("Error", "Failed to delete pool");
               }

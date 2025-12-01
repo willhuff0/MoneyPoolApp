@@ -6,10 +6,10 @@ export const getPools = (client: AxiosInstance) => async (poolIds: string[]): Pr
         poolIds: poolIds,
     } as Protocol.PoolGetPoolsRequest);
     if (response.status !== 200) return [];
-
-    const body = response.data as Protocol.PoolGetPoolsResponse;
+    
+    let body = response.data as Protocol.PoolGetPoolsResponse;
     for (let pool of body.pools) {
-        pool.members = new Map(Object.entries(pool.members));
+        if (!(pool.members instanceof Map)) pool.members = new Map(Object.entries(pool.members));
     }
     return body.pools;
 }

@@ -32,7 +32,7 @@ export default function SpecificPool() {
     };
 
     fetchData();
-  }, [poolId]);
+  }, [poolId, activeUser]);
 
   function onSplitTotal() {
     router.push(`/(root)/splittotal?poolId=${poolId}`);

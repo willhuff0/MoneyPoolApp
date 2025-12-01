@@ -25,7 +25,7 @@ export class UserDao {
                 displayName: displayName,
                 passwordDigest: passwordDigest,
                 allowRefreshTokensCreatedAfter: timestamp,
-                groups: [],
+                pools: [],
                 friends: [],
                 incomingFriendRequests: [],
                 chompScore: defaultChompScore,

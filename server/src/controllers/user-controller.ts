@@ -33,6 +33,7 @@ export class UserController {
                     userName: user.userName,
                     displayName: user.displayName,
                     chompScore: user.chompScore,
+                    pools: user.pools,
                 }
             } as Protocol.UserGetSelfUserResponse);
             return;

@@ -34,7 +34,7 @@ export default function AddTransaction() {
       );
 
       if (transactionId) {
-        router.back();
+        router.replace(`/(root)/specificpool?poolId=${poolId}`);
       } else {
         Alert.alert("Error", "Failed to add transaction");
         setSaving(false);
@@ -47,7 +47,7 @@ export default function AddTransaction() {
   }
 
   function handleCancel() {
-    router.push(`/(root)/specificpool?poolId=${poolId}`);
+    router.replace(`/(root)/specificpool?poolId=${poolId}`);
   }
 
   return (

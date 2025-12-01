@@ -14,7 +14,7 @@ export const createApiSdk = (client: AxiosInstance) => {
             acceptFriendRequest: User.acceptFriendRequest(client),
         },
         pool: {
-            getPool: Pool.getPool(client),
+            getPools: Pool.getPools(client),
             createPool: Pool.createPool(client),
             deletePool: Pool.deletePool(client),
             addMember: Pool.addMember(client),

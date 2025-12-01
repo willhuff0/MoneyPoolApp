@@ -1,16 +1,12 @@
 import { ApiProvider, useApi } from "@/api/api-provider";
-import { Stack, Redirect } from "expo-router";
+import { Stack, Redirect, usePathname } from "expo-router";
 
 function LoggedInSwitcher() {
   const api = useApi();
 
-  if (!api.ready) {
-    return null; // Or a loading screen
-  }
-
   if (api.activeUser == null) {
     return <Redirect href="/(auth)" />;
-  } else {
+  } else if (usePathname() === "/") {
     return <Redirect href="/(root)/homepage" />;
   }
 }

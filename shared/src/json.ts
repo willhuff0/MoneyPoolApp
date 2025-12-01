@@ -20,7 +20,7 @@ export interface Pool {
     poolId: string,
     displayName: string,
     ownerUserId: string,
-    members: { [userId: string]: number },
+    members: Map<string, number>,
     balance: number,
 }
 

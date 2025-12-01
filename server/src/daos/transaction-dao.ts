@@ -22,14 +22,15 @@ export class TransactionDao {
                 pool.balance += amount;
                 await pool.save({ session });
                 
-                await TransactionModel.create({
+                const newTransaction = new TransactionModel({
                     _id: transactionId,
                     poolId,
                     userId,
                     timestamp,
                     amount,
                     description,
-                }, { session });
+                });
+                await newTransaction.save({ session });
                 return true;
             });
         } finally {

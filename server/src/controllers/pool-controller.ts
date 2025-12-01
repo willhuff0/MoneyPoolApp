@@ -13,24 +13,29 @@ export class PoolController {
         this.poolDao = poolDao;
     }
 
-    public readonly getPool = async (req: Request, res: Response): Promise<void> => {
-        const body: Protocol.PoolGetPoolRequest = req.body;
+    public readonly getPools = async (req: Request, res: Response): Promise<void> => {
+        const body: Protocol.PoolGetPoolsRequest = req.body;
+        const sessionToken = req.sessionToken!;
 
-        const pool = await this.poolDao.getPoolById(body.poolId);
-        if (pool == null) {
-            res.status(404).json({ message: "Pool not found" } as Protocol.ErrorResponse);
+        if (body.poolIds.length === 0) {
+            res.status(400).end();
             return;
         }
 
+        let pools = await Promise.all(body.poolIds.map((poolId) => this.poolDao.getPoolById(poolId)));
+        pools = pools.filter((pool) => pool?.members.has(sessionToken.userId) ?? false);
+
         res.status(200).json({
-            pool: {
-                poolId: pool._id,
-                displayName: pool.name,
-                ownerUserId: pool.owner,
-                members: pool.members,
-                balance: pool.balance,
-            },
-        } as Protocol.PoolGetPoolResponse);
+            pools: pools.map((pool) => {
+                return {
+                    poolId: pool!._id,
+                    displayName: pool!.name,
+                    ownerUserId: pool!.owner,
+                    members: pool!.members,
+                    balance: pool!.balance,
+                };
+            }),
+        } as Protocol.PoolGetPoolsResponse);
     }
 
     public readonly createPool = async (req: Request, res: Response): Promise<void> => {

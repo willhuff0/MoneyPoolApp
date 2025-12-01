@@ -1,125 +1,149 @@
-import React, { useState } from "react";
-import { ScrollView, View, Text, StyleSheet, Pressable, Alert } from "react-native";
+import React from "react";
+import { ScrollView, View, Text, StyleSheet, Pressable } from "react-native";
 import { useApi } from "@/api/api-provider";
 import { useRouter } from "expo-router";
 
-export default function Settings() {
+export default function Profile() {
   const router = useRouter();
-  const api = useApi();
-  const userName = api.activeUser?.userName || "Username";
+  const { activeUser, signOut } = useApi();
+  
+  const displayName = activeUser?.displayName || "User";
+  const userName = activeUser?.userName || "username";
+  const email = activeUser?.email || "No email";
+  const initials = displayName.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
+
+  async function handleLogout() {
+    await signOut();
+  }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-        {/* Account Info*/}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{userName}</Text>
-          <View style={styles.placeholder}>
-             <View style={{ flexDirection: "column", alignItems: "flex-start", gap: 12 }}>
-                <Text style={{ fontSize: 18, fontWeight: "bold", textAlign: "left" }}>
-                  Email
-                </Text>
-                <Text style={{ fontSize: 16, textAlign: "left" }}>
-                  {api.activeUser?.email || "No email available"}
-                </Text>
-                <View style={{ display: "flex", flexDirection: "row", alignItems: "center" , gap: 12 }}>
-                  <Pressable style={styles.addButton} onPress={() => router.push("/(root)/editprofile")}>
-                    <Text style={styles.addButtonText}>Edit Profile</Text>
-                  </Pressable>
-                  <Pressable style={styles.addButton} onPress={() => api.signOut()}>
-                    <Text style={styles.addButtonText}>Log Out</Text>
-                  </Pressable>
-                </View>
-            </View>
-          </View>
+      <View style={styles.profileHeader}>
+        <View style={styles.avatarContainer}>
+          <Text style={styles.avatarText}>{initials}</Text>
         </View>
-      </ScrollView>
+        <Text style={styles.displayName}>{displayName}</Text>
+        <Text style={styles.userName}>@{userName}</Text>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Account Information</Text>
+        
+        <View style={styles.infoRow}>
+          <Text style={styles.label}>Email</Text>
+          <Text style={styles.value}>{email}</Text>
+        </View>
+
+        <Pressable style={styles.editButton} onPress={() => router.push("/(root)/editprofile")}>
+          <Text style={styles.editButtonText}>Edit Profile</Text>
+        </Pressable>
+      </View>
+
+      <Pressable style={styles.logoutButton} onPress={handleLogout}>
+        <Text style={styles.logoutButtonText}>Log Out</Text>
+      </Pressable>
+    </ScrollView>
   );
 }
 
-//Stylesheet cohesive with homepage, reusing container, section, and sectionTitle styles
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     backgroundColor: "#F5F4F7",
     padding: 16,
   },
-  headerRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+  profileHeader: {
+    alignItems: "center",
+    marginBottom: 24,
+    marginTop: 16,
+  },
+  avatarContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "#1428A0",
+    justifyContent: "center",
     alignItems: "center",
     marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  title: {
-    fontSize: 20,
-    fontWeight: "700",
+  avatarText: {
+    color: "#fff",
+    fontSize: 32,
+    fontWeight: "bold",
   },
-  createButton: {
-    backgroundColor: "#1428A0",
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
+  displayName: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#333",
   },
-  createButtonText: {
-    color: "#ffffffff",
-    fontWeight: "600",
-  },
-  list: {
-    marginTop: 8,
+  userName: {
+    fontSize: 16,
+    color: "#666",
+    marginTop: 4,
   },
   section: {
     backgroundColor: "#fff",
     borderRadius: 12,
-    padding: 24,
-    marginBottom: 16,
-    minHeight: 300,
+    padding: 20,
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
-  sectionHeader: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginBottom: 8,
-    },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 8,
-  },
-  placeholder: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    padding: 20,
-    alignItems: "flex-start",
-    justifyContent: "center",
-  },
-  placeholderText: {
-    color: "#888",
-    fontStyle: "italic",
-  },
-  addButton: {
-      backgroundColor: "#1428A0",
-      paddingVertical: 6,
-      paddingHorizontal: 12,
-      borderRadius: 8,
-    },
-    addButtonText: {
-      color: "#fff",
-      fontWeight: "600",
-      fontSize: 14,
-    },
-  emptyState: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 40,
-  },
-  emptyText: {
-    fontSize: 16,
-    fontWeight: "600",
+    marginBottom: 16,
     color: "#333",
-    marginBottom: 8,
   },
-  emptySubtext: {
+  infoRow: {
+    marginBottom: 20,
+  },
+  label: {
     fontSize: 14,
-    color: "#999",
+    color: "#888",
+    marginBottom: 4,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  value: {
+    fontSize: 16,
+    color: "#333",
+    fontWeight: "500",
+  },
+  editButton: {
+    backgroundColor: "#f0f0f0",
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  editButtonText: {
+    color: "#333",
+    fontWeight: "600",
+    fontSize: 16,
+  },
+  logoutButton: {
+    backgroundColor: "#fff",
+    paddingVertical: 12,
+    paddingHorizontal: 42,
+    borderRadius: 200,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#FF4500",
+    marginTop: "auto",
+    alignSelf: "center",
+    marginBottom: 32,
+  },
+  logoutButtonText: {
+    color: "#FF4500",
+    fontWeight: "600",
+    fontSize: 14,
   },
 });

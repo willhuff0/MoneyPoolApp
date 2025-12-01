@@ -41,3 +41,10 @@ export const acceptFriendRequest = (client: AxiosInstance) => async (otherUserId
     } as Protocol.UserAcceptFriendRequestRequest);
     return response.status === 200;
 }
+
+export const deleteFriend = (client: AxiosInstance) => async (otherUserId: string): Promise<boolean> => {
+    const response = await client.post(Protocol.userDeleteFriendEndpoint, {
+        otherUserId: otherUserId,
+    } as Protocol.UserDeleteFriendRequest);
+    return response.status === 200;
+}

@@ -1,30 +1,36 @@
 import React, { useState } from "react";
 import { Alert, Pressable, Text, TextInput, View, StyleSheet, ScrollView } from "react-native";
+import { useRouter } from "expo-router";
 //For connecting to API 
 import { useApi } from "@/api/api-provider";
 
 export default function EditProfile() {
-  const api = useApi();
-  const user = api.activeUser
-  const [displayName, setDisplayName] = useState(api.activeUser?.displayName || "");
-  const [email, setEmail] = useState(api.activeUser?.email || "");
+  const router = useRouter();
+  const { activeUser, refreshUser, editUser } = useApi();
+  const [displayName, setDisplayName] = useState(activeUser?.displayName || "");
+  const [email, setEmail] = useState(activeUser?.email || "");
   const [password, setPassword] = useState(""); // for new password
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.section}>
-        <Text style={{fontSize: 24,fontWeight: "bold",marginBottom: 16,}}>Edit Profile</Text>
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+          <Text style={{fontSize: 24,fontWeight: "bold"}}>Edit Profile</Text>
+          <Pressable onPress={() => router.replace("/(root)/profile")} style={{ padding: 8 }}>
+            <Text style={{ color: "#1428A0", fontWeight: "600" }}>Back</Text>
+          </Pressable>
+        </View>
         <Text style={styles.sectionTitle}>Display Name</Text>
         <TextInput
           placeholder="Enter New Display Name"
           autoCapitalize="none"
           value = {displayName}
           onChangeText={setDisplayName}
-          defaultValue = {user?.displayName}
+          defaultValue = {activeUser?.displayName}
           style={styles.input}
 
         />
-        <Pressable style={[styles.button]} onPress={() => api.editUser({newDisplayName: displayName}) }>
+        <Pressable style={[styles.button]} onPress={() => { editUser({newDisplayName: displayName}); refreshUser(); } }>
           <Text style={{ color: "white", fontWeight: "600"}}>Save New Display Name</Text>
         </Pressable>
         <Text style={styles.sectionTitle }>Email</Text>
@@ -33,10 +39,10 @@ export default function EditProfile() {
           autoCapitalize="none"
           value = {email}
           onChangeText={setEmail}
-          defaultValue= {user?.email}
+          defaultValue= {activeUser?.email}
           style={styles.input}
         />
-        <Pressable style={[styles.button]} onPress={() => api.editUser({newEmail : email })}>
+        <Pressable style={[styles.button]} onPress={() => { editUser({newEmail : email }); refreshUser(); } }>
           <Text style={{ color: "white", fontWeight: "600"}}>Save New Email</Text>
         </Pressable>
         <Text style={styles.sectionTitle}>Password</Text>
@@ -47,7 +53,7 @@ export default function EditProfile() {
           onChangeText={setPassword}
           style={styles.input}
         />
-        <Pressable style={[styles.button]} onPress={() => api.editUser({ newPassword : password}) }>
+        <Pressable style={[styles.button]} onPress={() => { editUser({ newPassword : password}); refreshUser(); } }>
           <Text style={{ color: "white", fontWeight: "600"}}>Save New Password</Text>
         </Pressable>
       </View>

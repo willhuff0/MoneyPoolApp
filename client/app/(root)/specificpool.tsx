@@ -1,91 +1,41 @@
 import React, { useState, useEffect } from "react";
-import { ScrollView, View, Text, StyleSheet, Pressable } from "react-native";
+import { View, Text, StyleSheet, Pressable } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSdk, useApi } from "@/api/api-provider";
+import { Pool } from "@money-pool-app/shared";
+import { TransactionList } from "@/components/transaction-list";
 
 export default function SpecificPool() {
   const router = useRouter();
   const { poolId } = useLocalSearchParams();
-  const sdk = useSdk();
   const { activeUser } = useApi();
+  const sdk = useSdk();
   
-  const [pool, setPool] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
-  //For testing: set true for owner and false for member
+  const [pool, setPool] = useState<Pool | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<unknown>(null);
+
   const [isOwner, setIsOwner] = useState(false);
-  const [transactions, setTransactions] = useState<any[]>([]);
-  const [splitMessages, setSplitMessages] = useState<any[]>([]);
 
   useEffect(() => {
-    setPool({
-      poolId: "mock-pool-1",
-      displayName: "Test Trip",
-      ownerUserId: activeUser?.userId,
-      members: ["user1", "user2"],
-      balance: 420.69,
-    });
+    const fetchData = async () => {
+      try {
+        if (!poolId || typeof poolId !== 'string') return;
+        const pools = await sdk.pool.getPools([poolId as string]);
+        setPool(pools.at(0) ?? null);
+        setIsOwner(pools.at(0)?.ownerUserId === activeUser!.userId);
+      } catch (error) {
+        setError(error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-    setTransactions([
-      { transactionId: "1", description: "Dinner at restaurant", amount: 45.50, userId: "user1", userName: "Alice" },
-      { transactionId: "2", description: "Gas for road trip", amount: 32.00, userId: "user2", userName: "Bob" },
-    ]);
-    
-    // loadPool();
-    // loadTransactions();
+    fetchData();
   }, [poolId]);
 
-  async function loadPool() {
-    if (!poolId || typeof poolId !== 'string') return;
-    
-    setLoading(true);
-    try {
-      const poolData = await sdk.pool.getPool(poolId);
-      if (poolData) {
-        setPool(poolData);
-        setIsOwner(poolData.ownerUserId === activeUser?.userId);
-      }
-    } catch (e) {
-      console.error("Error loading pool:", e);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function loadTransactions() {
-    if (!poolId || typeof poolId !== 'string') return;
-    
-    try {
-      const data = await sdk.transaction.getTransactions(poolId);
-      if (data) {
-        setTransactions(data);
-      }
-    } catch (e) {
-      console.error("Error loading transactions:", e);
-    }
-  }
-
   function onSplitTotal() {
-    if (!pool || !pool.balance) return;
-    
-    const memberCount = pool.members?.length || 0;
-    if (memberCount === 0) {
-      alert("No members in pool");
-      return;
-    }
-
-    const totalBeforeSplit = pool.balance;
-    const splitAmount = (pool.balance / memberCount).toFixed(2);
-    
-    //split message contains previous total and amount ower per pool member (including owner)
-    const splitMessage = {
-      id: `split-${Date.now()}`,
-      message: `You pool's total of $${totalBeforeSplit.toFixed(2)} was split. You owe $${splitAmount}`,
-    };
-    
-    setSplitMessages([...splitMessages, splitMessage]);
-    
-    //After splitting, balance should be 0 incase more transactions are added after 
-    setPool({ ...pool, balance: 0 });
+    router.push(`/(root)/splittotal?poolId=${poolId}`);
   }
 
   function onManagePool() {
@@ -100,7 +50,7 @@ export default function SpecificPool() {
     router.push(`/(root)/addtransaction?poolId=${poolId}`);
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
       <View style={styles.container}>
         <Text>Loading...</Text>
@@ -120,7 +70,12 @@ export default function SpecificPool() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.poolName}>{pool.displayName}</Text>
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+          <Text style={styles.poolName}>{pool.displayName}</Text>
+          <Pressable onPress={() => router.replace("/(root)/poolslist")} style={{ padding: 8 }}>
+            <Text style={{ color: "#1428A0", fontWeight: "600" }}>Back</Text>
+          </Pressable>
+        </View>
         <View style={styles.totalBox}>
           <Text style={styles.totalLabel}>Total</Text>
           <Text style={styles.totalAmount}>${pool.balance?.toFixed(2) || "0.00"}</Text>
@@ -129,24 +84,28 @@ export default function SpecificPool() {
 
       {/* Owner View/Specific Controls */}
       {isOwner ? (
-        <View style={styles.ownerControls}>
-          <Pressable style={styles.ownerButton} onPress={onSplitTotal}>
-            <Text style={styles.ownerButtonText}>Split Total</Text>
+        <View style={styles.poolControls}>
+          <Pressable style={styles.poolButton} onPress={onSplitTotal}>
+            <Text style={styles.poolButtonText}>Split Total</Text>
           </Pressable>
-          <Pressable style={styles.ownerButton} onPress={onManagePool}>
-            <Text style={styles.ownerButtonText}>Manage Pool</Text>
+          <Pressable style={styles.poolButton} onPress={onManagePool}>
+            <Text style={styles.poolButtonText}>Manage Pool</Text>
           </Pressable>
         </View>
       ) : (
-        <View style={styles.memberControls}>
-          <Pressable style={styles.memberButton} onPress={onViewMembers}>
-            <Text style={styles.memberButtonText}>View Members</Text>
+        <View style={styles.poolControls}>
+          <Pressable style={styles.poolButton} onPress={onSplitTotal}>
+            <Text style={styles.poolButtonText}>Split Total</Text>
+          </Pressable>
+          <Pressable style={styles.poolButton} onPress={onViewMembers}>
+            <Text style={styles.poolButtonText}>View Members</Text>
           </Pressable>
         </View>
       )}
 
       {/* Transactions and Split Messages Feed */}
-      <ScrollView style={styles.transactionsFeed} contentContainerStyle={styles.transactionsContent}>
+      <TransactionList poolId={pool.poolId}></TransactionList>
+      {/* <ScrollView style={styles.transactionsFeed} contentContainerStyle={styles.transactionsContent}>
         {transactions.length === 0 && splitMessages.length === 0 ? (
           <View style={styles.emptyState}>
             <Text style={styles.emptyText}>No transactions yet</Text>
@@ -168,7 +127,7 @@ export default function SpecificPool() {
             ))}
           </>
         )}
-      </ScrollView>
+      </ScrollView> */}
 
       {/* Add Transaction Button */}
       <View style={styles.footer}>
@@ -212,7 +171,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#FF8C00",
   },
-  ownerControls: {
+  poolControls: {
     flexDirection: "row",
     padding: 16,
     gap: 12,
@@ -220,31 +179,14 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#e5e7eb",
   },
-  ownerButton: {
+  poolButton: {
     flex: 1,
     backgroundColor: "#1428A0",
     paddingVertical: 12,
     borderRadius: 10,
     alignItems: "center",
   },
-  ownerButtonText: {
-    color: "#fff",
-    fontWeight: "600",
-    fontSize: 14,
-  },
-  memberControls: {
-    padding: 16,
-    backgroundColor: "#fff",
-    borderBottomWidth: 1,
-    borderBottomColor: "#e5e7eb",
-  },
-  memberButton: {
-    backgroundColor: "#1428A0",
-    paddingVertical: 12,
-    borderRadius: 10,
-    alignItems: "center",
-  },
-  memberButtonText: {
+  poolButtonText: {
     color: "#fff",
     fontWeight: "600",
     fontSize: 14,

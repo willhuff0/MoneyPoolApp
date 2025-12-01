@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { ScrollView, View, Text, StyleSheet, TextInput, Pressable, Alert } from "react-native";
 import { useRouter } from "expo-router";
-import { useSdk } from "@/api/api-provider";
+import { useApi, useSdk } from "@/api/api-provider";
 
 export default function CreatePool() {
   const router = useRouter();
   const sdk = useSdk();
+  const { refreshUser } = useApi();
   const [name, setName] = useState("");
   const [creating, setCreating] = useState(false);
 
@@ -21,7 +22,8 @@ export default function CreatePool() {
       const poolId = await sdk.pool.createPool(trimmedName);
       if (poolId) {
         Alert.alert("Success", `Pool '${trimmedName}' created!`);
-        router.replace("/(root)/poolslist");
+        refreshUser();
+        router.push("/(root)/poolslist");
       } else {
         Alert.alert("Error", "Failed to create pool");
       }
@@ -36,7 +38,12 @@ export default function CreatePool() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Create Pool</Text>
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+          <Text style={styles.sectionTitle}>Create Pool</Text>
+          <Pressable onPress={() => router.replace("/(root)/poolslist")} style={{ padding: 8 }}>
+            <Text style={{ color: "#1428A0", fontWeight: "600" }}>Back</Text>
+          </Pressable>
+        </View>
 
         <Text style={styles.label}>Pool name</Text>
         <TextInput style={styles.input} value={name} onChangeText={setName} placeholder="e.g. Weekend Trip" />
@@ -48,7 +55,7 @@ export default function CreatePool() {
           <Pressable style={[styles.button, creating && { backgroundColor: "#94a3b8" }]} onPress={onCreate} disabled={creating}>
             <Text style={styles.buttonText}>{creating ? "Creating Pool..." : "Create"}</Text>
           </Pressable>
-          <Pressable style={styles.cancelButton} onPress={() => router.back()} disabled={creating}>
+          <Pressable style={styles.cancelButton} onPress={() => router.push("/(root)/poolslist")} disabled={creating}>
             <Text style={styles.cancelButtonText}>Cancel</Text>
           </Pressable>
         </View>

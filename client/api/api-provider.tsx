@@ -11,10 +11,14 @@ type ActiveUser = {
     email: string,
     displayName: string,
     chompScore: number,
+    pools: string[],
+    friends: string[],
+    incomingFriendRequests: string[],
 } | null;
 
 type ApiContextType = {
     activeUser: ActiveUser,
+    refreshUser: () => Promise<void>,
     doesUserExist: (request: AuthDoesUserExistRequest) => Promise<boolean>,
     signIn: (request: AuthSignInRequest) => Promise<boolean>,
     signUp: (request: AuthCreateUserRequest) => Promise<boolean>,
@@ -49,6 +53,9 @@ export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
                         email: user.email,
                         displayName: user.displayName,
                         chompScore: user.chompScore,
+                        pools: user.pools,
+                        friends: user.friends,
+                        incomingFriendRequests: user.incomingFriendRequests,
                     });
                 }
             } catch (error) {
@@ -64,6 +71,29 @@ export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
 
     const value = useMemo<ApiContextType>(() => ({
         activeUser, ready, client: apiClient, sdk,
+        refreshUser: async () => {
+            if (getRefreshToken() == undefined) return;
+            try {
+                const response = await apiClient.get<UserGetSelfUserResponse>(userGetUserEndpoint);
+                if (response.status === 200) {
+                    const { user } = response.data;
+                    setActiveUser({
+                        userId: user.userId,
+                        userName: user.userName,
+                        email: user.email,
+                        displayName: user.displayName,
+                        chompScore: user.chompScore,
+                        pools: user.pools,
+                        friends: user.friends,
+                        incomingFriendRequests: user.incomingFriendRequests,
+                    });
+                }
+            } catch (error) {
+                console.log(`Not logged in or session expired: ${error}`);
+                await clearTokens();
+                setActiveUser(null);
+            }
+        },
         doesUserExist: async (request) => {
             try {
                 const response = await axios.post<AuthDoesUserExistResponse>(`${apiClient.defaults.baseURL}${authDoesUserExistEndpoint}`, request);
@@ -91,6 +121,9 @@ export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
                     email: user.email,
                     displayName: user.displayName,
                     chompScore: user.chompScore,
+                    pools: user.pools,
+                    friends: user.friends,
+                    incomingFriendRequests: user.incomingFriendRequests,
                 });
                 return true;
             } catch (error) {
@@ -114,6 +147,9 @@ export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
                     email: request.email,
                     displayName: request.displayName,
                     chompScore: user.chompScore,
+                    pools: [],
+                    friends: [],
+                    incomingFriendRequests: [],
                 });
                 return true;
             } catch (error) {
@@ -150,6 +186,9 @@ export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
                     email: request.newEmail ?? activeUser.email,
                     displayName: request.newDisplayName ?? activeUser.displayName,
                     chompScore: activeUser.chompScore,
+                    pools: activeUser.pools,
+                    friends: activeUser.friends,
+                    incomingFriendRequests: activeUser.incomingFriendRequests,
                 });
                 return true;
             } catch (error) {
@@ -161,7 +200,7 @@ export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
 
     return (
         <ApiContext.Provider value={value}>
-            {children}
+            {value.ready ? children : LoadingScreen()}
         </ApiContext.Provider>
     )
 }
@@ -175,3 +214,21 @@ export const useApi = () => {
 export const useSdk = () => {
     return useApi().sdk;
 }
+
+import { View, ActivityIndicator, StyleSheet } from "react-native";
+
+function LoadingScreen() {
+  return (
+    <View style={styles.container}>
+      <ActivityIndicator size="large" />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+});

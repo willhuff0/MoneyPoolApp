@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { userAcceptFriendRequestEndpoint, userCreateFriendRequestEndpoint, userDeleteFriendRequestEndpoint, userEditUserEndpoint, userGetUserEndpoint, userSearchUserEndpoint } from "@money-pool-app/shared";
+import { userAcceptFriendRequestEndpoint, userCreateFriendRequestEndpoint, userDeleteFriendEndpoint, userDeleteFriendRequestEndpoint, userEditUserEndpoint, userGetUserEndpoint, userSearchUserEndpoint } from "@money-pool-app/shared";
 
 import { UserDao } from "../daos/user-dao";
 import { UserController } from "../controllers/user-controller";
@@ -21,6 +21,7 @@ export const getUserRouter = (userDao: UserDao): Router => {
     router.all(removePrefix(userCreateFriendRequestEndpoint), controller.createFriendRequest);
     router.all(removePrefix(userDeleteFriendRequestEndpoint), controller.deleteFriendRequest);
     router.all(removePrefix(userAcceptFriendRequestEndpoint), controller.acceptFriendRequest);
+    router.all(removePrefix(userDeleteFriendEndpoint), controller.deleteFriend);
 
     return router;
 }

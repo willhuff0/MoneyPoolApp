@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { Alert, Pressable, Text, TextInput, View, StyleSheet, ScrollView } from "react-native";
+import { useRouter } from "expo-router";
 //For connecting to API 
 import { useSdk } from "@/api/api-provider";
 
 export default function AddFriendsScreen() {
+  const router = useRouter();
   const sdk = useSdk();
   const [query, setQuery] = useState("");
   const [searching, setSearching] = useState(false);
@@ -48,7 +50,12 @@ export default function AddFriendsScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Find Friends</Text>
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+          <Text style={{ fontSize: 18, fontWeight: "bold" }}>Find Friends</Text>
+          <Pressable onPress={() => router.replace("/(root)/homepage")} style={{ padding: 8 }}>
+            <Text style={{ color: "#1428A0", fontWeight: "600" }}>Back</Text>
+          </Pressable>
+        </View>
         <Text style={styles.subtitleText}>Enter a valid username to send a friend request.</Text>
 
         <TextInput

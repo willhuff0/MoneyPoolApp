@@ -1,5 +1,5 @@
 import { Mongoose } from "mongoose";
-import { PoolModel, TransactionDocument, TransactionModel } from "../models"
+import { PoolModel, TransactionDocument, TransactionModel, UserModel } from "../models"
 
 export class TransactionDao {
     db: Mongoose;
@@ -22,13 +22,18 @@ export class TransactionDao {
                 pool.balance += amount;
                 await pool.save({ session });
                 
-                await TransactionModel.create({
+                const newTransaction = new TransactionModel({
                     _id: transactionId,
                     poolId,
                     userId,
                     timestamp,
                     amount,
                     description,
+                });
+                await newTransaction.save({ session });
+
+                await UserModel.findByIdAndUpdate(userId, {
+                    $inc: { chompScore: 5 },
                 }, { session });
                 return true;
             });
@@ -68,6 +73,7 @@ export class TransactionDao {
         return await TransactionModel.find({
             poolId,
         })
+            .sort({ timestamp: -1 })
             .skip(start)
             .limit(count)
             .exec();

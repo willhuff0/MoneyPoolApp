@@ -1,5 +1,5 @@
 import { Mongoose } from "mongoose";
-import { PoolModel, PoolDocument } from "../models"
+import { PoolModel, PoolDocument, UserModel } from "../models"
 
 export class PoolDao {
     db: Mongoose;
@@ -9,15 +9,23 @@ export class PoolDao {
     }
 
     public readonly createPool = async (poolId: string, name: string, owner: string): Promise<void> => {
-        const newPool = new PoolModel({
-            _id: poolId,
-            name,
-            owner,
-            members: [owner],
-            balance: 0,
-        });
+        const session = await this.db.startSession();
+        try {
+            const newPool = new PoolModel({
+                _id: poolId,
+                name,
+                owner,
+                members: {[owner]: 0},
+                balance: 0,
+            });
+            await newPool.save({ session });
 
-        await newPool.save();
+            await UserModel.findByIdAndUpdate(owner, {
+                $addToSet: { pools: poolId },
+            }, { session });
+        } finally {
+            await session.endSession();
+        }
     }
 
     public readonly getPoolById = async (poolId: string): Promise<PoolDocument | null> => {
@@ -32,9 +40,17 @@ export class PoolDao {
                 if (pool == null) return false;
                 if (pool.owner !== checkOwnerId) return false;
 
-                await pool.updateOne({
-                    $addToSet: { members: userId }
+                const userToAdd = await UserModel.findById(userId).session(session);
+                if (userToAdd == null) return false;
+                if (!userToAdd.friends.includes(checkOwnerId)) return false;
+
+                pool.members.set(userId, 0);
+                await pool.save({ session });
+
+                await UserModel.findByIdAndUpdate(userId, {
+                    $addToSet: { pools: poolId },
                 }, { session });
+
                 return true;
             });
         } finally {
@@ -50,9 +66,13 @@ export class PoolDao {
                 if (pool == null) return false;
                 if (pool.owner !== checkOwnerId) return false;
 
-                await pool.updateOne({
-                    $pull: { members: userId }
+                pool.members.delete(userId);
+                await pool.save({ session });
+
+                await UserModel.findByIdAndUpdate(userId, {
+                    $pull: { pools: poolId },
                 }, { session });
+
                 return true;
             });
         } finally {
@@ -68,7 +88,14 @@ export class PoolDao {
                 if (pool == null) return false;
                 if (pool.owner !== checkOwnerId) return false;
 
+                for (const member of Object.keys(pool.members)) {
+                    await UserModel.findByIdAndUpdate(member, {
+                        $pull: { pools: poolId },
+                    }, { session });
+                }
+
                 await pool.deleteOne({ session });
+
                 return true;
             });
         } finally {

@@ -33,6 +33,9 @@ export class UserController {
                     userName: user.userName,
                     displayName: user.displayName,
                     chompScore: user.chompScore,
+                    pools: user.pools,
+                    friends: user.friends,
+                    incomingFriendRequests: user.incomingFriendRequests,
                 }
             } as Protocol.UserGetSelfUserResponse);
             return;
@@ -124,6 +127,11 @@ export class UserController {
         const body: Protocol.UserCreateFriendRequestRequest = req.body;
         const sessionToken = req.sessionToken!;
 
+        if (body.otherUserId === sessionToken.userId) {
+            res.status(400).json({ message: "Cannot friend self" } as Protocol.ErrorResponse);
+            return;
+        }
+
         if (!await this.userDao.createFriendRequest(sessionToken.userId, body.otherUserId)) {
             res.status(404).json({ message: "Other user not found or an error occurred" } as Protocol.ErrorResponse);
             return;
@@ -133,22 +141,30 @@ export class UserController {
     }
 
     public readonly deleteFriendRequest = async (req: Request, res: Response): Promise<void> => {
-        const body: Protocol.UserCreateFriendRequestRequest = req.body;
+        const body: Protocol.UserDeleteFriendRequestRequest = req.body;
         const sessionToken = req.sessionToken!;
 
-        await this.userDao.deleteFriendRequest(sessionToken.userId, body.otherUserId)
+        await this.userDao.deleteFriendRequest(body.otherUserId, sessionToken.userId);
         res.status(200).end();
     }
 
     public readonly acceptFriendRequest = async (req: Request, res: Response): Promise<void> => {
-        const body: Protocol.UserCreateFriendRequestRequest = req.body;
+        const body: Protocol.UserAcceptFriendRequestRequest = req.body;
         const sessionToken = req.sessionToken!;
 
-        if (!await this.userDao.acceptFriendRequest(sessionToken.userId, body.otherUserId)) {
+        if (!await this.userDao.acceptFriendRequest(body.otherUserId, sessionToken.userId)) {
             res.status(404).json({ message: "Other user not found or an error occurred" } as Protocol.ErrorResponse);
             return;
         }
 
+        res.status(200).end();
+    }
+
+    public readonly deleteFriend = async (req: Request, res: Response): Promise<void> => {
+        const body: Protocol.UserDeleteFriendRequest = req.body;
+        const sessionToken = req.sessionToken!;
+
+        await this.userDao.deleteFriend(body.otherUserId, sessionToken.userId);
         res.status(200).end();
     }
 }

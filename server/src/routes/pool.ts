@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { poolAddMemberEndpoint, poolCreatePoolEndpoint, poolDeletePoolEndpoint, poolGetPoolEndpoint, poolRemoveMemberEndpoint } from "@money-pool-app/shared";
+import { poolAddMemberEndpoint, poolCreatePoolEndpoint, poolDeletePoolEndpoint, poolGetPoolsEndpoint, poolRemoveMemberEndpoint } from "@money-pool-app/shared";
 
 import { PoolDao } from "../daos/pool-dao";
 import { PoolController } from "../controllers/pool-controller";
@@ -15,7 +15,7 @@ export const getPoolRouter = (poolDao: PoolDao): Router => {
 
     const controller = new PoolController(poolDao);
 
-    router.all(removePrefix(poolGetPoolEndpoint), controller.getPool);
+    router.all(removePrefix(poolGetPoolsEndpoint), controller.getPools);
     router.all(removePrefix(poolCreatePoolEndpoint), controller.createPool);
     router.all(removePrefix(poolDeletePoolEndpoint), controller.deletePool);
     router.all(removePrefix(poolAddMemberEndpoint), controller.addMember);

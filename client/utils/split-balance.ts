@@ -1,12 +1,12 @@
-export const splitBalance = (debts: { [userId: string]: number }, poolBalance: number): {
+export const splitBalance = (debts: Map<string, number>, poolBalance: number): {
     fromUserId: string,
     toUserId: string,
     amount: number,
 }[] => {
-    const fairShare = poolBalance / Object.keys(debts).length;
+    const fairShare = poolBalance / debts.size;
 
     const netBalances: { [userId: string]: number } = {};
-    for (const [userId, debt] of Object.entries(debts)) {
+    for (const [userId, debt] of debts.entries()) {
         netBalances[userId] = debt - fairShare;
     }
 
@@ -47,7 +47,7 @@ export const splitBalance = (debts: { [userId: string]: number }, poolBalance: n
     let j = 0; // index into creditors
     while (i < debtors.length && j < creditors.length) {
         const debtor = debtors[i];
-        const creditor = creditors[i];
+        const creditor = creditors[j];
 
         const amount = Math.min(debtor.amountToPay, creditor.amountToReceive);
 

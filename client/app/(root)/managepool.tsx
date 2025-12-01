@@ -1,8 +1,21 @@
 import React, { useState, useEffect } from "react";
-import { ScrollView, View, Text, StyleSheet, Pressable, TextInput, Alert } from "react-native";
+import { ScrollView, View, Text, StyleSheet, Pressable, TextInput, Alert, Modal, FlatList, ActivityIndicator, SafeAreaView } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 //for API calls
 import { useSdk, useApi } from "@/api/api-provider";
+import { Pool, User } from "@money-pool-app/shared";
+
+export const withoutElement = (map: Map<string, any>, key: string): Map<string, any> => {
+  let newMap = new Map(map);
+  newMap.delete(key);
+  return newMap;
+}
+
+export const withElement = (map: Map<string, any>, key: string, value: any): Map<string, any> => {
+  let newMap = new Map(map);
+  newMap.set(key, value);
+  return newMap;
+}
 
 export default function ManagePool() {
   const router = useRouter();
@@ -10,133 +23,163 @@ export default function ManagePool() {
   const sdk = useSdk();
   const { activeUser } = useApi();
   
-  const [pool, setPool] = useState<any>(null);
-  const [memberDetails, setMemberDetails] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  //For testing: set true for owner, false for member 
-  const [isOwner, setIsOwner] = useState(false);
-  const [addUsername, setAddUsername] = useState("");
-  const [removeUsername, setRemoveUsername] = useState("");
+  const [pool, setPool] = useState<Pool | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<unknown>(null);
+  const [isOwner, setIsOwner] = useState(true);
+  const [userNames, setUserNames] = useState<Map<string, {userName: string, displayName: string}>>(new Map());
   const [addingMember, setAddingMember] = useState(false);
   const [removingMember, setRemovingMember] = useState(false);
+  const [isAddMemberModalVisible, setIsAddMemberModalVisible] = useState(false);
+  const [friends, setFriends] = useState<User[]>([]);
+  const [selectedFriendIds, setSelectedFriendIds] = useState<Set<string>>(new Set());
+  const [friendSearchQuery, setFriendSearchQuery] = useState("");
+  const [loadingFriends, setLoadingFriends] = useState(false);
 
-  useEffect(() => {
-    // Mock pool data for testing
-    const mockPool = {
-      poolId: "mock-pool-1",
-      displayName: "Weekend Trip",
-    //   ownerUserId: activeUser?.userId,
-      ownerUserId: "user1",
-      members: { "user1": 0, "user2": 0, "user3": 0 },
-      balance: 0,
+useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (!poolId || typeof poolId !== 'string') return;
+
+        const pools = await sdk.pool.getPools([poolId as string]);
+        setPool(pools.at(0) ?? null);
+        setIsOwner(pools.at(0)?.ownerUserId === activeUser!.userId);
+
+        if (pools.at(0) == null) {
+          setUserNames(new Map());
+        } else {
+          const newUserNames = new Map<string, {userName: string, displayName: string}>();
+          await Promise.all(pools.at(0)!.members.keys().map(async (id) => {
+            const user = await sdk.user.getUser(id);
+            if (user) newUserNames.set(id, {userName: user.userName, displayName: user.displayName});
+          }));
+          setUserNames(newUserNames);
+        }
+      } catch (error) {
+        setError(error);
+      } finally {
+        setIsLoading(false);
+      }
     };
-    // Mock member details
-    const mockMemberDetails = [
-      { userId: "user1", userName: "alice", displayName: "Alice" },
-      { userId: "user2", userName: "bob", displayName: "Bob" },
-      { userId: "user3", userName: "charlie", displayName: "Charlie" },
-    ];
-    setPool(mockPool);
-    setMemberDetails(mockMemberDetails);
-    setIsOwner(mockPool.ownerUserId === activeUser?.userId);
-    
-    // Will uncomment when connecting to backend
-    // loadPool();
+
+    fetchData();
   }, [poolId]);
 
-  async function loadPool() {
-    if (!poolId || typeof poolId !== 'string') return;
+  useEffect(() => {
+    if (isAddMemberModalVisible && isOwner) {
+      fetchFriends();
+    }
+  }, [isAddMemberModalVisible, isOwner]);
+
+  const fetchFriends = async () => {
+    if (!activeUser?.friends) return;
     
-    setLoading(true);
+    setLoadingFriends(true);
     try {
-      const poolData = await sdk.pool.getPool(poolId);
-      if (poolData) {
-        setPool(poolData);
-        
-        // Fetch user details for each member
-        const memberUserIds = Object.keys(poolData.members || {});
-        const memberDetailsPromises = memberUserIds.map(userId => sdk.user.getUser(userId));
-        const fetchedMemberDetails = await Promise.all(memberDetailsPromises);
-        
-        setMemberDetails(fetchedMemberDetails.filter(user => user !== null));
-        setIsOwner(poolData.ownerUserId === activeUser?.userId);
-      }
+      const friendIds = activeUser.friends;
+      const users: User[] = [];
+      
+      await Promise.all(friendIds.map(async (id) => {
+        try {
+          // Skip if already in pool
+          if (pool?.members.has(id)) return;
+          
+          const u = await sdk.user.getUser(id);
+          if (u) users.push(u);
+        } catch (e) {
+          console.warn(`Failed to fetch user ${id}`, e);
+        }
+      }));
+      
+      setFriends(users);
     } catch (e) {
-      console.error("Error loading pool:", e);
+      console.error("Error fetching friends:", e);
     } finally {
-      setLoading(false);
+      setLoadingFriends(false);
     }
-  }
+  };
 
-  async function handleAddMember() {
-    if (!addUsername.trim()) {
-      Alert.alert("Error", "Please enter a username");
-      return;
+  const toggleFriendSelection = (userId: string) => {
+    const newSelected = new Set(selectedFriendIds);
+    if (newSelected.has(userId)) {
+      newSelected.delete(userId);
+    } else {
+      newSelected.add(userId);
     }
+    setSelectedFriendIds(newSelected);
+  };
 
-    //Add member by searching username 
+  const handleAddSelectedMembers = async () => {
+    if (selectedFriendIds.size === 0) return;
+    
     setAddingMember(true);
+    let successCount = 0;
+    let failCount = 0;
+    
     try {
-      const user = await sdk.user.searchUser(addUsername.trim());
+      const idsToAdd = Array.from(selectedFriendIds);
       
-      if (!user) {
-        Alert.alert("Error", "user not found");
-        setAddingMember(false);
-        return;
+      for (const userId of idsToAdd) {
+        try {
+          const success = await sdk.pool.addMember(poolId as string, userId);
+          if (success) {
+            successCount++;
+            // Update local state immediately for better UX
+             const friend = friends.find(f => f.userId === userId);
+             if (friend) {
+                setPool(prev => {
+                    if (!prev) return null;
+                    return {
+                        ...prev,
+                        members: withElement(prev.members, userId, 0)
+                    }
+                });
+                setUserNames(prev => withElement(prev, userId, {
+                    userName: friend.userName,
+                    displayName: friend.displayName
+                }));
+             }
+          } else {
+            failCount++;
+          }
+        } catch (e) {
+          console.error(`Failed to add member ${userId}`, e);
+          failCount++;
+        }
       }
-
-      // Add member to pool
-      const success = await sdk.pool.addMember(poolId as string, user.userId);
       
-      if (success) {
-        //Dynamic updates for members list 
-        setMemberDetails([...memberDetails, user]);
-        setAddUsername("");
-        Alert.alert("Success", `${user.displayName} added to pool`);
-      } else {
-        Alert.alert("Error", "Failed to add member");
-      }
+      Alert.alert(
+        "Result", 
+        `Added ${successCount} member(s).${failCount > 0 ? ` Failed to add ${failCount}.` : ""}`
+      );
+      
+      setIsAddMemberModalVisible(false);
+      setSelectedFriendIds(new Set());
+      setFriendSearchQuery("");
+      
     } catch (e) {
-      console.error("Error adding member:", e);
-      Alert.alert("Error", "Failed to add member");
+      console.error("Error adding members:", e);
+      Alert.alert("Error", "An unexpected error occurred");
     } finally {
       setAddingMember(false);
     }
-  }
+  };
 
-  async function handleRemoveMember() {
-    if (!removeUsername.trim()) {
-      Alert.alert("Error", "Please enter a username");
-      return;
-    }
-
-    //remove member by searching
+  async function handleRemoveMember(userId: string, displayName: string) {
+    // Remove member directly using ID
     setRemovingMember(true);
     try {
-      const user = await sdk.user.searchUser(removeUsername.trim());
-      
-      if (!user) {
-        Alert.alert("Error", "User not found");
-        setRemovingMember(false);
-        return;
-      }
-
-      // Check if user is in the pool
-      const memberExists = memberDetails.find(m => m.userId === user.userId);
-      if (!memberExists) {
-        Alert.alert("Error", "User is not a member of this pool");
-        setRemovingMember(false);
-        return;
-      }
-
       // Remove member from pool
-      const success = await sdk.pool.removeMember(poolId as string, user.userId);
+      const success = await sdk.pool.removeMember(poolId as string, userId);
       
       if (success) {
         // Update members list
-        setMemberDetails(memberDetails.filter(m => m.userId !== user.userId));
-        setRemoveUsername("");
-        Alert.alert("Success", `${user.displayName} removed from pool`);
+        setPool({
+          ...pool!,
+          members: withoutElement(pool!.members, userId),
+        });
+        setUserNames(withoutElement(userNames, userId));
+        Alert.alert("Success", `${displayName} removed from pool`);
       } else {
         Alert.alert("Error", "Failed to remove member");
       }
@@ -180,13 +223,21 @@ export default function ManagePool() {
   }
 
   function handleGoBack() {
-    router.push(`/(root)/specificpool?poolId=${poolId}`);
+    router.replace(`/(root)/specificpool?poolId=${poolId}`);
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
       <View style={styles.container}>
         <Text>Loading...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.container}>
+        <Text>{String(error)}</Text>
       </View>
     );
   }
@@ -198,6 +249,8 @@ export default function ManagePool() {
       </View>
     );
   }
+
+  const userNameArray = Array.from(userNames.entries()); 
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -211,24 +264,32 @@ export default function ManagePool() {
 
       {/* Members List */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Members ({memberDetails.length})</Text>
-        {memberDetails.length === 0 ? (
+        <Text style={styles.sectionTitle}>Members ({userNames.size})</Text>
+        {userNames.size === 0 ? (
           <View style={styles.placeholder}>
             <Text style={styles.placeholderText}>No members yet</Text>
           </View>
         ) : (
           <View style={styles.membersList}>
-            {memberDetails.map((member) => (
-              <View key={member.userId} style={styles.memberItem}>
-                <View>
+            {userNameArray.map(([userId, member]) => (
+              <View key={userId} style={styles.memberItem}>
+                <View style={{ flex: 1 }}>
                   <Text style={styles.memberName}>{member.displayName}</Text>
                   <Text style={styles.memberUsername}>@{member.userName}</Text>
                 </View>
-                {member.userId === pool.ownerUserId && (
+                {userId === pool.ownerUserId ? (
                   <View style={styles.ownerBadge}>
                     <Text style={styles.ownerBadgeText}>Owner</Text>
                   </View>
-                )}
+                ) : isOwner ? (
+                  <Pressable 
+                    style={[styles.removeButton, removingMember && styles.disabledButton]} 
+                    onPress={() => handleRemoveMember(userId, member.displayName)}
+                    disabled={removingMember}
+                  >
+                    <Text style={styles.removeButtonText}>Remove</Text>
+                  </Pressable>
+                ) : null}
               </View>
             ))}
           </View>
@@ -241,49 +302,12 @@ export default function ManagePool() {
           {/* Add Member Section */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Add Member</Text>
-            <View style={styles.inputContainer}>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter member's username to add"
-                value={addUsername}
-                onChangeText={setAddUsername}
-                autoCapitalize="none"
-                editable={!addingMember}
-              />
-              <Pressable 
-                style={[styles.button, styles.actionButton, addingMember && styles.disabledButton]} 
-                onPress={handleAddMember}
-                disabled={addingMember}
-              >
-                <Text style={styles.buttonText}>
-                  {addingMember ? "Adding..." : "Add"}
-                </Text>
-              </Pressable>
-            </View>
-          </View>
-
-          {/* Section for removing members */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Remove Member</Text>
-            <View style={styles.inputContainer}>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter member's username to remove"
-                value={removeUsername}
-                onChangeText={setRemoveUsername}
-                autoCapitalize="none"
-                editable={!removingMember}
-              />
-              <Pressable 
-                style={[styles.button, styles.actionButton, removingMember && styles.disabledButton]} 
-                onPress={handleRemoveMember}
-                disabled={removingMember}
-              >
-                <Text style={styles.buttonText}>
-                  {removingMember ? "Removing..." : "Remove"}
-                </Text>
-              </Pressable>
-            </View>
+            <Pressable 
+              style={styles.button} 
+              onPress={() => setIsAddMemberModalVisible(true)}
+            >
+              <Text style={styles.buttonText}>Add Friends to Pool</Text>
+            </Pressable>
           </View>
 
           {/* Button for deleting pool */}
@@ -294,6 +318,90 @@ export default function ManagePool() {
           </View>
         </>
       )}
+      <Modal
+        visible={isAddMemberModalVisible}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setIsAddMemberModalVisible(false)}
+      >
+        <SafeAreaView style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Add Friends</Text>
+            <Pressable onPress={() => setIsAddMemberModalVisible(false)}>
+              <Text style={styles.closeButtonText}>Cancel</Text>
+            </Pressable>
+          </View>
+          
+          <View style={styles.searchContainer}>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search friends..."
+              value={friendSearchQuery}
+              onChangeText={setFriendSearchQuery}
+              autoCapitalize="none"
+            />
+          </View>
+          
+          {loadingFriends ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#1428A0" />
+            </View>
+          ) : (
+            <FlatList
+              data={friends.filter(f => 
+                f.displayName.toLowerCase().includes(friendSearchQuery.toLowerCase()) || 
+                f.userName.toLowerCase().includes(friendSearchQuery.toLowerCase())
+              )}
+              keyExtractor={item => item.userId}
+              renderItem={({ item }) => (
+                <Pressable 
+                  style={[
+                    styles.friendItem, 
+                    selectedFriendIds.has(item.userId) && styles.selectedFriendItem
+                  ]}
+                  onPress={() => toggleFriendSelection(item.userId)}
+                >
+                  <View>
+                    <Text style={[
+                      styles.friendName,
+                      selectedFriendIds.has(item.userId) && styles.selectedFriendText
+                    ]}>{item.displayName}</Text>
+                    <Text style={[
+                      styles.friendUsername,
+                      selectedFriendIds.has(item.userId) && styles.selectedFriendText
+                    ]}>@{item.userName}</Text>
+                  </View>
+                  {selectedFriendIds.has(item.userId) && (
+                    <View style={styles.checkmark}>
+                      <Text style={styles.checkmarkText}>✓</Text>
+                    </View>
+                  )}
+                </Pressable>
+              )}
+              ListEmptyComponent={
+                <View style={styles.emptyList}>
+                  <Text style={styles.emptyListText}>
+                    {friends.length === 0 ? "No friends available to add" : "No matching friends found"}
+                  </Text>
+                </View>
+              }
+              contentContainerStyle={styles.listContent}
+            />
+          )}
+          
+          <View style={styles.modalFooter}>
+            <Pressable 
+              style={[styles.button, selectedFriendIds.size === 0 && styles.disabledButton]}
+              onPress={handleAddSelectedMembers}
+              disabled={selectedFriendIds.size === 0 || addingMember}
+            >
+              <Text style={styles.buttonText}>
+                {addingMember ? "Adding..." : `Add Selected (${selectedFriendIds.size})`}
+              </Text>
+            </Pressable>
+          </View>
+        </SafeAreaView>
+      </Modal>
     </ScrollView>
   );
 }
@@ -370,6 +478,17 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "600",
   },
+  removeButton: {
+    backgroundColor: "#FF4500",
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+  },
+  removeButtonText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "600",
+  },
   placeholder: {
     borderWidth: 1,
     borderColor: "#ddd",
@@ -382,24 +501,6 @@ const styles = StyleSheet.create({
     color: "#888",
     fontStyle: "italic",
   },
-  inputContainer: {
-    flexDirection: "row",
-    gap: 8,
-  },
-  input: {
-    flex: 1,
-    backgroundColor: "#F5F4F7",
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: "#ddd",
-  },
-  actionButton: {
-    minWidth: 90,
-    paddingHorizontal: 20,
-  },
   disabledButton: {
     opacity: 0.5,
   },
@@ -407,5 +508,101 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "600",
     fontSize: 14,
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: "#F5F4F7",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 16,
+    backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  closeButtonText: {
+    color: "#1428A0",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  searchContainer: {
+    padding: 16,
+    backgroundColor: "#fff",
+  },
+  searchInput: {
+    backgroundColor: "#F5F4F7",
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    fontSize: 16,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  listContent: {
+    padding: 16,
+  },
+  friendItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 16,
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: "transparent",
+  },
+  selectedFriendItem: {
+    borderColor: "#1428A0",
+    backgroundColor: "#F0F2FF",
+  },
+  friendName: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+  },
+  friendUsername: {
+    fontSize: 14,
+    color: "#6b7280",
+    marginTop: 2,
+  },
+  selectedFriendText: {
+    color: "#1428A0",
+  },
+  checkmark: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: "#1428A0",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  checkmarkText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "bold",
+  },
+  emptyList: {
+    padding: 32,
+    alignItems: "center",
+  },
+  emptyListText: {
+    color: "#888",
+    fontSize: 16,
+  },
+  modalFooter: {
+    padding: 16,
+    backgroundColor: "#fff",
+    borderTopWidth: 1,
+    borderTopColor: "#eee",
   },
 });

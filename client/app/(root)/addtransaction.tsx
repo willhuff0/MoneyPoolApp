@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { ScrollView, View, Text, TextInput, Pressable, StyleSheet, Alert } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useSdk } from "@/api/api-provider";
+import { useApi, useSdk } from "@/api/api-provider";
 
 export default function AddTransaction() {
   const router = useRouter();
   const { poolId } = useLocalSearchParams();
   const sdk = useSdk();
+  const { refreshUser } = useApi();
   
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
@@ -34,7 +35,8 @@ export default function AddTransaction() {
       );
 
       if (transactionId) {
-        router.back();
+        router.replace(`/(root)/specificpool?poolId=${poolId}`);
+        refreshUser();
       } else {
         Alert.alert("Error", "Failed to add transaction");
         setSaving(false);
@@ -47,13 +49,18 @@ export default function AddTransaction() {
   }
 
   function handleCancel() {
-    router.push(`/(root)/specificpool?poolId=${poolId}`);
+    router.replace(`/(root)/specificpool?poolId=${poolId}`);
   }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Add Transaction</Text>
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+          <Text style={styles.sectionTitle}>Add Transaction</Text>
+          <Pressable onPress={() => router.replace(`/(root)/specificpool?poolId=${poolId}`)} style={{ padding: 8 }}>
+            <Text style={{ color: "#1428A0", fontWeight: "600" }}>Back</Text>
+          </Pressable>
+        </View>
 
         <Text style={styles.label}>Purpose of Transaction</Text>
         <TextInput

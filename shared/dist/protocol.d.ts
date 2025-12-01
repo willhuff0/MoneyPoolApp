@@ -41,6 +41,9 @@ export interface AuthSignInResponse {
         userName: string;
         displayName: string;
         chompScore: number;
+        pools: string[];
+        friends: string[];
+        incomingFriendRequests: string[];
     };
 }
 export declare const authRefreshEndpoint = "/auth/refresh";
@@ -71,6 +74,9 @@ export interface UserGetSelfUserResponse {
         userName: string;
         displayName: string;
         chompScore: number;
+        pools: string[];
+        friends: string[];
+        incomingFriendRequests: string[];
     };
 }
 export declare const userEditUserEndpoint = "/user/editUser";
@@ -100,12 +106,16 @@ export declare const userDeleteFriendRequestEndpoint = "/user/deleteFriendReques
 export interface UserDeleteFriendRequestRequest {
     otherUserId: string;
 }
-export declare const poolGetPoolEndpoint = "/pool/getPool";
-export interface PoolGetPoolRequest {
-    poolId: string;
+export declare const userDeleteFriendEndpoint = "/user/deleteFriend";
+export interface UserDeleteFriendRequest {
+    otherUserId: string;
 }
-export interface PoolGetPoolResponse {
-    pool: Pool;
+export declare const poolGetPoolsEndpoint = "/pool/getPools";
+export interface PoolGetPoolsRequest {
+    poolIds: string[];
+}
+export interface PoolGetPoolsResponse {
+    pools: Pool[];
 }
 export declare const poolCreatePoolEndpoint = "/pool/createPool";
 export interface PoolCreatePoolRequest {

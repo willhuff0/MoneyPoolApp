@@ -1,14 +1,17 @@
 import * as Protocol from "@money-pool-app/shared";
 import { AxiosInstance } from "axios";
 
-export const getPool = (client: AxiosInstance) => async (poolId: string): Promise<Protocol.Pool | null> => {
-    const response = await client.post(Protocol.poolGetPoolEndpoint, {
-        poolId: poolId,
-    } as Protocol.PoolGetPoolRequest);
-    if (response.status !== 200) return null;
+export const getPools = (client: AxiosInstance) => async (poolIds: string[]): Promise<Protocol.Pool[]> => {
+    const response = await client.post(Protocol.poolGetPoolsEndpoint, {
+        poolIds: poolIds,
+    } as Protocol.PoolGetPoolsRequest);
+    if (response.status !== 200) return [];
 
-    const body = response.data as Protocol.PoolGetPoolResponse;
-    return body.pool;
+    const body = response.data as Protocol.PoolGetPoolsResponse;
+    for (let pool of body.pools) {
+        pool.members = new Map(Object.entries(pool.members));
+    }
+    return body.pools;
 }
 
 export const createPool = (client: AxiosInstance) => async (name: string): Promise<string | null> => {

@@ -12,9 +12,10 @@ export const createApiSdk = (client: AxiosInstance) => {
             createFriendRequest: User.createFriendRequest(client),
             deleteFriendRequest: User.deleteFriendRequest(client),
             acceptFriendRequest: User.acceptFriendRequest(client),
+            deleteFriend: User.deleteFriend(client),
         },
         pool: {
-            getPool: Pool.getPool(client),
+            getPools: Pool.getPools(client),
             createPool: Pool.createPool(client),
             deletePool: Pool.deletePool(client),
             addMember: Pool.addMember(client),

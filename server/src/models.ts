@@ -7,7 +7,7 @@ interface DbUser {
     displayName: string,
     passwordDigest: string,
     allowRefreshTokensCreatedAfter: Date,
-    groups: string[],
+    pools: string[],
     friends: string[],
     incomingFriendRequests: string[],
     chompScore: number,
@@ -19,7 +19,7 @@ const userSchema = new Schema({
     displayName: { type: String, required: true },
     passwordDigest: { type: String, required: true },
     allowRefreshTokensCreatedAfter: { type: Date, required: true },
-    groups: [String],
+    pools: [String],
     friends: [String],
     incomingFriendRequests: [String],
     chompScore: { type: Number, required: true },
@@ -32,7 +32,7 @@ interface DbPool {
     _id: string;
     name: string;
     owner: string;
-    members: { [userId: string]: number };
+    members: Map<string, number>;
     balance: number;
 }
 const poolSchema = new Schema({

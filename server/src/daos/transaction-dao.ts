@@ -12,7 +12,7 @@ export class TransactionDao {
         const session = await this.db.startSession();
         try {
             return await session.withTransaction(async () => {
-                const pool = await PoolModel.findById(poolId, { session });
+                const pool = await PoolModel.findById(poolId).session(session);
                 if (pool == null) return false;
                 
                 const userBalance = pool.members.get(userId);
@@ -41,10 +41,10 @@ export class TransactionDao {
         const session = await this.db.startSession();
         try {
             return await session.withTransaction(async () => {
-                const transaction = await TransactionModel.findById(transactionId, { session });
+                const transaction = await TransactionModel.findById(transactionId).session(session);
                 if (transaction == null) return false;
 
-                const pool = await PoolModel.findById(transaction.poolId, { session });
+                const pool = await PoolModel.findById(transaction.poolId).session(session);
                 if (pool == null) return false;
 
                 if (transaction.userId !== checkUserId && pool.owner !== checkUserId) return false;

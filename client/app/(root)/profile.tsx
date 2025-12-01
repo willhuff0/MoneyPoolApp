@@ -32,16 +32,6 @@ export default function Settings() {
             </View>
           </View>
         </View>
-  
-        {/* Settings Section */}
-         <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Friends</Text>
-            <Pressable style={styles.addButton} onPress={() => router.push("/(root)/editprofile")}>
-              <Text style={styles.addButtonText}>Edit Profile</Text>
-            </Pressable>
-          </View>
-          </View>
       </ScrollView>
   );
 }

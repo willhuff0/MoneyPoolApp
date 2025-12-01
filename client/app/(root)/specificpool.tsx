@@ -11,7 +11,8 @@ export default function SpecificPool() {
   
   const [pool, setPool] = useState<any>(null);
   const [loading, setLoading] = useState(false);
-  const [isOwner, setIsOwner] = useState(true);
+  //For testing: set true for owner and false for member
+  const [isOwner, setIsOwner] = useState(false);
   const [transactions, setTransactions] = useState<any[]>([]);
   const [splitMessages, setSplitMessages] = useState<any[]>([]);
 
@@ -145,7 +146,6 @@ export default function SpecificPool() {
       )}
 
       {/* Transactions and Split Messages Feed */}
-      //One map for transactions and one for split messages
       <ScrollView style={styles.transactionsFeed} contentContainerStyle={styles.transactionsContent}>
         {transactions.length === 0 && splitMessages.length === 0 ? (
           <View style={styles.emptyState}>
